@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Settings, RefreshCw, Plus, Trash2, ShieldAlert, Check, Newspaper, Award, HelpCircle, Eye, Lock, KeyRound, LogOut, Loader2, Sparkles, Play, Wrench } from "lucide-react";
 import { AdConfiguration, Notice } from "../types";
 import { motion } from "motion/react";
+import { safeJsonResponse } from "../services/animeService";
 
 interface AdminViewProps {
   notices: Notice[];
@@ -78,12 +79,12 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passcode: activePasscode }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setPromptTemplate(data.promptTemplate);
-        setPromptTemplateInput(data.promptTemplate);
-        setCurrentPasscode(data.currentPasscode);
-        sessionStorage.setItem("active_admin_passcode", data.currentPasscode);
+      const parsed = await safeJsonResponse(res);
+      if (parsed.ok && parsed.data) {
+        setPromptTemplate(parsed.data.promptTemplate);
+        setPromptTemplateInput(parsed.data.promptTemplate);
+        setCurrentPasscode(parsed.data.currentPasscode);
+        sessionStorage.setItem("active_admin_passcode", parsed.data.currentPasscode);
       }
     } catch (err) {
       console.error("Failed to load prompt config:", err);
@@ -103,20 +104,17 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
         body: JSON.stringify({ passcode: passcodeInput }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.authenticated) {
-          setIsAdminAuthenticated(true);
-          try {
-            sessionStorage.setItem("anime_diagnose_admin_auth", "true");
-            sessionStorage.setItem("active_admin_passcode", passcodeInput);
-          } catch (storageErr) {
-            console.error(storageErr);
-          }
+      const parsed = await safeJsonResponse(res);
+      if (parsed.ok && parsed.data?.authenticated) {
+        setIsAdminAuthenticated(true);
+        try {
+          sessionStorage.setItem("anime_diagnose_admin_auth", "true");
+          sessionStorage.setItem("active_admin_passcode", passcodeInput);
+        } catch (storageErr) {
+          console.error(storageErr);
         }
       } else {
-        const errorData = await res.json();
-        setAuthError(errorData.error || "認証に失敗しました。");
+        setAuthError(parsed.errorMsg || "認証に失敗しました（静的ホスティング環境では /api サーバーが動作していない可能性があります）。");
       }
     } catch (err) {
       setAuthError("認証サーバーへの通信エラーが発生しました。");
@@ -167,7 +165,8 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
         }),
       });
 
-      if (res.ok) {
+      const parsed = await safeJsonResponse(res);
+      if (parsed.ok) {
         setSuccessMsg("AIプロンプトおよびセキュリティ設定を正常に更新しました！");
         if (newPasscode) {
           sessionStorage.setItem("active_admin_passcode", newPasscode);
@@ -178,8 +177,7 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
         await fetchConfig();
         setTimeout(() => setSuccessMsg(""), 4500);
       } else {
-        const errData = await res.json();
-        setConfigError(errData.error || "設定の保存に失敗しました。");
+        setConfigError(parsed.errorMsg || "設定の保存に失敗しました。");
       }
     } catch (err) {
       setConfigError("通信エラーにより、保存処理を完了できませんでした。");
@@ -208,14 +206,13 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setPlaygroundResult(data);
+      const parsed = await safeJsonResponse(res);
+      if (parsed.ok && parsed.data) {
+        setPlaygroundResult(parsed.data);
         setSuccessMsg("テスト診断プレイグラウンド実行に成功！AI診断の検証が完了しました。");
         setTimeout(() => setSuccessMsg(""), 4500);
       } else {
-        const errData = await res.json();
-        setPlaygroundError(errData.error || "AIプレイグラウンド実行エラーが発生しました。");
+        setPlaygroundError(parsed.errorMsg || "AIプレイグラウンド実行エラーが発生しました。");
       }
     } catch (err) {
       setPlaygroundError("Gemini AIサーバーへの通信エラーが発生しました。プロンプト構文やAPI制限を確認してください。");

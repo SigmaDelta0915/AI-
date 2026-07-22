@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, ArrowLeft, ArrowRight, Loader, Cpu, ShieldAlert, BadgeInfo } from "lucide-react";
 import { DiagnosisQuestion, DiagnosisResult } from "../types";
 import { motion, AnimatePresence } from "motion/react";
+import { runDiagnosis } from "../services/animeService";
 
 interface DiagnoseViewProps {
   setView: (view: string) => void;
@@ -242,32 +243,20 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
     }, 1800);
 
     try {
-      const res = await fetch("/api/diagnose", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          answers,
-          categoryScores,
-        }),
-      });
-
+      const result = await runDiagnosis(answers, categoryScores);
       clearInterval(interval);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "診断中に不具合が発生しました。");
+      if (!result || !result.typeName) {
+        throw new Error("診断結果の生成に失敗しました。もう一度お試しください。");
       }
 
-      const result: DiagnosisResult = await res.json();
       setDiagnosisResult(result);
       saveDiagnosisToHistory(result, answers);
       setView("result");
     } catch (error: any) {
       clearInterval(interval);
-      console.error(error);
-      setErrorMsg(error.message || "Gemini AIの接続エラーです。もう一度お試しください。");
+      console.error("Diagnosis error:", error);
+      setErrorMsg(error?.message || "AI診断処理中にエラーが発生しました。もう一度お試しください。");
       setDiagnosing(false);
     }
   };

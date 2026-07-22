@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, Filter, Star, Heart, Play, RefreshCw, Calendar, ArrowRight } from "lucide-react";
 import { AnimeMedia } from "../types";
 import { motion } from "motion/react";
+import { searchAnime } from "../services/animeService";
 
 interface SearchViewProps {
   initialSearch: string;
@@ -59,23 +60,13 @@ export default function SearchView({
   const fetchResults = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/anime/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          search: search || undefined,
-          genre: genre || undefined,
-          year: year || undefined,
-          sort,
-        }),
+      const data = await searchAnime({
+        search: search || undefined,
+        genre: genre || undefined,
+        year: year || undefined,
+        sort,
       });
-
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data);
-      }
+      setResults(data);
     } catch (error) {
       console.error("Failed to load search results:", error);
     } finally {

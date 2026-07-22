@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Sparkles, Search, Play, ArrowRight, Star, Heart, Flame, Shield, TrendingUp, Compass } from "lucide-react";
 import { AnimeMedia } from "../types";
 import { motion } from "motion/react";
+import { getPopularAnime } from "../services/animeService";
 
 interface HomeViewProps {
   setView: (view: string) => void;
@@ -25,11 +26,8 @@ export default function HomeView({
   useEffect(() => {
     async function loadPopular() {
       try {
-        const res = await fetch("/api/anime/popular?perPage=12");
-        if (res.ok) {
-          const data = await res.json();
-          setPopularAnime(data);
-        }
+        const data = await getPopularAnime(12);
+        setPopularAnime(data);
       } catch (error) {
         console.error("Failed to load popular anime list:", error);
       } finally {

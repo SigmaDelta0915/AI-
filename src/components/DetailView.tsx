@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Star, Heart, Calendar, Play, ExternalLink, Bookmark, ShieldCheck, Film, Tv, Info, HelpCircle } from "lucide-react";
 import { AnimeMedia } from "../types";
 import { motion } from "motion/react";
+import { getAnimeDetail } from "../services/animeService";
 
 interface DetailViewProps {
   animeId: number | null;
@@ -21,11 +22,8 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
     async function loadAnimeDetails() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/anime/${animeId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setAnime(data);
-        }
+        const data = await getAnimeDetail(animeId);
+        setAnime(data);
       } catch (error) {
         console.error("Failed to load anime details:", error);
       } finally {
