@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { AnimeMedia } from "../types";
-import { Film, Sparkles } from "lucide-react";
+import { Film, Sparkles, Star } from "lucide-react";
 
 interface AnimeCardImageProps {
   anime: AnimeMedia;
@@ -21,66 +21,72 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
     anime.title?.english ||
     "アニメ作品";
 
-  // Build priority image candidate list
-  const candidates: string[] = [];
-  if (cover?.extraLarge) candidates.push(cover.extraLarge);
-  if (cover?.large) candidates.push(cover.large);
-  if (cover?.medium) candidates.push(cover.medium);
+  // Collect candidate original URLs
+  const rawUrls: string[] = [];
+  if (cover?.extraLarge) rawUrls.push(cover.extraLarge);
+  if (cover?.large) rawUrls.push(cover.large);
+  if (cover?.medium) rawUrls.push(cover.medium);
 
-  const [candidateIndex, setCandidateIndex] = useState(0);
-  const [isProxied, setIsProxied] = useState(false);
+  // Generate fallback sources: Proxied first for stability, then direct URLs
+  const sources: string[] = [];
+  rawUrls.forEach((url) => {
+    sources.push(`/api/image-proxy?url=${encodeURIComponent(url)}`);
+    sources.push(url);
+  });
+
+  const [sourceIndex, setSourceIndex] = useState(0);
   const [hasError, setHasError] = useState(false);
 
-  const rawCandidate = candidates[candidateIndex];
-
-  let displaySrc = rawCandidate;
-  if (isProxied && rawCandidate) {
-    displaySrc = `/api/image-proxy?url=${encodeURIComponent(rawCandidate)}`;
-  }
-
   const handleImageError = () => {
-    if (!isProxied && rawCandidate) {
-      // Try server-side proxy route for current candidate URL first
-      setIsProxied(true);
-    } else if (candidateIndex < candidates.length - 1) {
-      // Try next candidate image URL directly
-      setIsProxied(false);
-      setCandidateIndex((prev) => prev + 1);
+    if (sourceIndex < sources.length - 1) {
+      setSourceIndex((prev) => prev + 1);
     } else {
       setHasError(true);
     }
   };
 
-  const brandColor = cover?.color || "#6366f1";
+  const currentSrc = sources[sourceIndex];
+  const brandColor = cover?.color || "#e11d48"; // Default rose accent
 
-  if (!displaySrc || hasError) {
+  if (!currentSrc || hasError) {
     return (
       <div
-        className={`relative flex flex-col justify-between p-4 overflow-hidden select-none bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 ${aspectRatio}`}
+        className={`relative flex flex-col justify-between p-4 overflow-hidden select-none bg-gradient-to-br from-slate-900 via-zinc-900 to-rose-950 ${aspectRatio}`}
         style={{
           borderTop: `4px solid ${brandColor}`,
         }}
       >
-        <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-20 blur-xl" style={{ backgroundColor: brandColor }} />
-        <div className="flex items-center justify-between text-white/50 text-xs z-10">
-          <Film className="w-4 h-4 text-indigo-400" />
-          <span className="text-[10px] uppercase font-mono tracking-wider px-1.5 py-0.5 rounded bg-white/10">
-            {anime.genres?.[0] || "Anime"}
+        <div
+          className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-25 blur-2xl pointer-events-none"
+          style={{ backgroundColor: brandColor }}
+        />
+        <div className="flex items-center justify-between text-white/60 text-xs z-10">
+          <div className="flex items-center space-x-1 bg-black/40 px-2 py-0.5 rounded-md border border-white/10 backdrop-blur-sm">
+            <Film className="w-3.5 h-3.5 text-rose-400" />
+            <span className="text-[10px] font-bold text-gray-200">ANIME</span>
+          </div>
+          <span className="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            {anime.genres?.[0] || "人気作品"}
           </span>
         </div>
-        <div className="my-auto text-center z-10 py-2">
-          <p className="text-sm font-bold text-white line-clamp-3 leading-snug drop-shadow-sm">
+
+        <div className="my-auto text-center z-10 py-3 px-1">
+          <div className="inline-block px-2 py-0.5 mb-2 rounded bg-white/10 backdrop-blur-md border border-white/10 text-[10px] text-gray-300 font-semibold">
+            {anime.startDate?.year ? `${anime.startDate.year}年作品` : "名作アニメ"}
+          </div>
+          <h3 className="text-sm font-black text-white line-clamp-3 leading-snug drop-shadow-md tracking-tight">
             {primaryTitle}
-          </p>
-          {anime.startDate?.year && (
-            <p className="text-[11px] text-indigo-300 font-medium mt-1">
-              {anime.startDate.year}年作品
-            </p>
-          )}
+          </h3>
         </div>
-        <div className="flex items-center justify-center gap-1 text-[10px] text-indigo-300/70 z-10">
-          <Sparkles className="w-3 h-3 text-amber-400" />
-          <span>スコア: {anime.averageScore ? `${anime.averageScore}%` : "評価好評"}</span>
+
+        <div className="flex items-center justify-between text-[11px] text-gray-300 z-10 bg-black/40 px-2.5 py-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <div className="flex items-center space-x-1 text-amber-400 font-bold">
+            <Star className="w-3.5 h-3.5 fill-amber-400" />
+            <span>{anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "8.5"}</span>
+          </div>
+          <span className="text-[10px] text-gray-400">
+            {anime.episodes ? `全${anime.episodes}話` : "公式配信"}
+          </span>
         </div>
       </div>
     );
@@ -88,7 +94,7 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
 
   return (
     <img
-      src={displaySrc}
+      src={currentSrc}
       alt={primaryTitle}
       referrerPolicy="no-referrer"
       onError={handleImageError}
@@ -97,3 +103,4 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
     />
   );
 };
+
