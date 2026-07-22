@@ -173,6 +173,37 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", apiProvider: "Shangri-La Anime API / Annict (日本国内公式API)" });
 });
 
+// Image Proxy route to bypass hotlinking/CORS issues on anime cover images
+app.get("/api/image-proxy", async (req, res) => {
+  const imageUrl = req.query.url as string;
+  if (!imageUrl || !imageUrl.startsWith("http")) {
+    return res.status(400).send("Valid HTTP/HTTPS image URL is required");
+  }
+
+  try {
+    const response = await fetch(imageUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).send("Failed to fetch target image");
+    }
+
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=86400"); // 24hr cache
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    res.send(buffer);
+  } catch (err: any) {
+    res.status(500).send("Error proxying image");
+  }
+});
+
 // Japanese Genre Map for standardization
 const JAPANESE_GENRE_MAP: Record<string, string> = {
   Action: "バトル・アクション",

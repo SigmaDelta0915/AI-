@@ -83,20 +83,51 @@ export function ensureJapaneseAnimeData(anime: AnimeMedia): AnimeMedia {
   const desc = copy.description || "";
   const hasJapaneseChar = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(desc);
 
-  const knownFallback = FALLBACK_POPULAR_ANIME.find(
-    f => f.id === copy.id || 
-         (jpTitle && f.title.native && (jpTitle.includes(f.title.native) || f.title.native.includes(jpTitle))) || 
-         (displayTitle && f.title.native && (displayTitle.includes(f.title.native) || f.title.native.includes(displayTitle))) ||
-         (copy.title?.english && f.title.english && copy.title.english.toLowerCase().includes(f.title.english.toLowerCase()))
-  );
+  // Normalize titles for robust matching
+  const cleanJp = (jpTitle || "").replace(/[\s\t\n・！!★☆ー〜-]/g, "").toLowerCase();
+  const cleanDisplay = (displayTitle || "").replace(/[\s\t\n・！!★☆ー〜-]/g, "").toLowerCase();
+
+  const knownFallback = FALLBACK_POPULAR_ANIME.find(f => {
+    if (f.id === copy.id) return true;
+    const fNative = (f.title.native || "").replace(/[\s\t\n・！!★☆ー〜-]/g, "").toLowerCase();
+    const fEnglish = (f.title.english || "").toLowerCase();
+    
+    if (fNative && (cleanJp.includes(fNative) || fNative.includes(cleanJp))) return true;
+    if (fNative && (cleanDisplay.includes(fNative) || fNative.includes(cleanDisplay))) return true;
+    if (fEnglish && copy.title?.english && copy.title.english.toLowerCase().includes(fEnglish)) return true;
+    return false;
+  });
 
   if (knownFallback && knownFallback.description) {
     copy.description = knownFallback.description;
-  } else if (!hasJapaneseChar || desc.length < 10) {
-    const genreText = copy.genres && copy.genres.length > 0 ? copy.genres.slice(0, 3).join("・") : "人気";
-    copy.description = `『${displayTitle}』は、${genreText}ジャンルを中心に描かれる人気の高いアニメ作品です。魅力的なキャラクターとドラマチックなストーリー展開が大きな話題と高い評価を集めています。`;
+  } else if (!hasJapaneseChar || desc.length < 90) {
+    const genreText = copy.genres && copy.genres.length > 0 ? copy.genres.slice(0, 3).join("・") : "バトル・ファンタジー・ドラマ";
+    const studioText = copy.studios?.nodes?.[0]?.name ? `【アニメーション制作】${copy.studios.nodes[0].name}\n` : "";
+    const scoreText = copy.averageScore ? `平均スコア ${copy.averageScore}点` : "ファン評価高得点";
+    
+    copy.description = `【ストーリー概要】
+『${displayTitle}』は、${genreText}の世界観を舞台に繰り広げられる大人気アニメーション作品です。
+
+綿密に組み上げられたストーリーテリングと魅力溢れるキャラクターたちが織りなすドラマが大きな反響を呼んでおり、物語の核心へ向かうにつれて深まる謎や数々のクライマックスシーン、心揺さぶるエピソードが見どころとなっています。
+
+【作品のみどころ・特徴】
+・【${genreText}】ジャンルを象徴する圧倒的なクオリティの作画と臨場感溢れるバトル＆ドラマ演出
+・主人公をはじめとする個性豊かなキャラクター同士の人間模様と胸を打つ成長ストーリー
+・${studioText}・ファンから${scoreText}を獲得している名作アニメ作品`;
   } else {
-    copy.description = desc.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]*>/g, "").trim();
+    const cleaned = desc.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]*>/g, "").trim();
+    if (!cleaned.includes("【ストーリー概要】")) {
+      const genreText = copy.genres && copy.genres.length > 0 ? copy.genres.slice(0, 3).join("・") : "アニメ";
+      copy.description = `【ストーリー概要】
+${cleaned}
+
+【作品のみどころ・特徴】
+・【${genreText}】ジャンルならではのハイクオリティな映像美と疾走感あふれる演出
+・キャラクターたちの葛藤や成長、仲間との熱い絆を繊細かつ重厚に描いたストーリー
+・劇中を彩るサウンドトラックと豪華キャスト陣による魂のこもった熱演`;
+    } else {
+      copy.description = cleaned;
+    }
   }
 
   return copy;

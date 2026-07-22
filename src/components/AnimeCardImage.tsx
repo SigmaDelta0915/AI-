@@ -28,12 +28,23 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
   if (cover?.medium) candidates.push(cover.medium);
 
   const [candidateIndex, setCandidateIndex] = useState(0);
+  const [isProxied, setIsProxied] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  const currentSrc = candidates[candidateIndex];
+  const rawCandidate = candidates[candidateIndex];
+
+  let displaySrc = rawCandidate;
+  if (isProxied && rawCandidate) {
+    displaySrc = `/api/image-proxy?url=${encodeURIComponent(rawCandidate)}`;
+  }
 
   const handleImageError = () => {
-    if (candidateIndex < candidates.length - 1) {
+    if (!isProxied && rawCandidate) {
+      // Try server-side proxy route for current candidate URL first
+      setIsProxied(true);
+    } else if (candidateIndex < candidates.length - 1) {
+      // Try next candidate image URL directly
+      setIsProxied(false);
       setCandidateIndex((prev) => prev + 1);
     } else {
       setHasError(true);
@@ -42,7 +53,7 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
 
   const brandColor = cover?.color || "#6366f1";
 
-  if (!currentSrc || hasError) {
+  if (!displaySrc || hasError) {
     return (
       <div
         className={`relative flex flex-col justify-between p-4 overflow-hidden select-none bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 ${aspectRatio}`}
@@ -77,7 +88,7 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
 
   return (
     <img
-      src={currentSrc}
+      src={displaySrc}
       alt={primaryTitle}
       referrerPolicy="no-referrer"
       onError={handleImageError}
