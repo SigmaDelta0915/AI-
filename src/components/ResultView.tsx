@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, RefreshCw, Star, Heart, ArrowRight, Share2, Play, ExternalLink, Bookmark, Award, Copy, Check, Camera, QrCode } from "lucide-react";
 import { DiagnosisResult, RecommendedAnime } from "../types";
 import { motion } from "motion/react";
+import { translateGenreToJapanese } from "../data/fallbackAnime";
 
 interface ResultViewProps {
   result: DiagnosisResult | null;
@@ -359,7 +360,7 @@ export default function ResultView({
                       <div className="flex flex-wrap gap-1">
                         {rec.media.genres.map((g, gIdx) => (
                           <span key={gIdx} className="inline-block rounded bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-600">
-                            {g}
+                            {translateGenreToJapanese(g)}
                           </span>
                         ))}
                       </div>

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Search, Filter, Star, Heart, Play, RefreshCw, Calendar, ArrowRight } from "lucide-react";
 import { AnimeMedia } from "../types";
 import { motion } from "motion/react";
+import { AnimeCardImage } from "./AnimeCardImage";
 import { searchAnime } from "../services/animeService";
+import { translateGenreToJapanese } from "../data/fallbackAnime";
 
 interface SearchViewProps {
   initialSearch: string;
@@ -18,13 +20,16 @@ const GENRE_LIST = [
   { value: "Action", label: "バトル・アクション" },
   { value: "Romance", label: "恋愛・ラブコメ" },
   { value: "Drama", label: "感動・ドラマ" },
-  { value: "Comedy", label: "日常・コメディ" },
+  { value: "Comedy", label: "コメディ・ギャグ" },
+  { value: "Slice of Life", label: "日常・ほのぼの" },
+  { value: "Fantasy", label: "ファンタジー・異世界" },
+  { value: "Sci-Fi", label: "SF・サイバーパンク" },
   { value: "Mystery", label: "推理・ミステリー" },
-  { value: "Sci-Fi", label: "SF・サイバー" },
-  { value: "Fantasy", label: "ファンタジー" },
-  { value: "Sports", label: "スポーツ" },
+  { value: "Sports", label: "スポーツ・熱血" },
   { value: "Thriller", label: "サスペンス・スリラー" },
   { value: "Music", label: "音楽・バンド" },
+  { value: "Adventure", label: "冒険・アドベンチャー" },
+  { value: "Supernatural", label: "オカルト・超能力" },
 ];
 
 export default function SearchView({
@@ -226,18 +231,7 @@ export default function SearchView({
                   onClick={() => selectAnime(anime.id)}
                   className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-gray-50 cursor-pointer"
                 >
-                  {anime.coverImage?.large ? (
-                    <img
-                      src={anime.coverImage.large}
-                      alt={mainTitle}
-                      referrerPolicy="no-referrer"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400 text-xs">
-                      No Image
-                    </div>
-                  )}
+                  <AnimeCardImage anime={anime} />
 
                   {/* Dark gradient overlap */}
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
@@ -290,7 +284,7 @@ export default function SearchView({
                         key={idx}
                         className="inline-block rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-semibold text-rose-600"
                       >
-                        {g}
+                        {translateGenreToJapanese(g)}
                       </span>
                     ))}
                   </div>

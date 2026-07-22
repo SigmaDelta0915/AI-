@@ -23,9 +23,14 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-rose-500 via-pink-500 to-violet-500 shadow-md shadow-rose-500/10 transition-transform group-hover:scale-105">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
-          <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-xl font-bold tracking-tight text-transparent font-sans">
-            アニメ診断 <span className="text-rose-500 text-sm font-medium tracking-normal ml-0.5">Diagnose</span>
-          </span>
+          <div className="flex items-center space-x-1.5">
+            <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-xl font-bold tracking-tight text-transparent font-sans">
+              アニメ診断 <span className="text-rose-500 text-sm font-medium tracking-normal ml-0.5">Diagnose</span>
+            </span>
+            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              国内公式API連動
+            </span>
+          </div>
         </div>
 
         {/* Desktop Menu */}

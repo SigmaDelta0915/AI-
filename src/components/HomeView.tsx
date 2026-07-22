@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Sparkles, Search, Play, ArrowRight, Star, Heart, Flame, Shield, TrendingUp, Compass } from "lucide-react";
 import { AnimeMedia } from "../types";
 import { motion } from "motion/react";
+import { AnimeCardImage } from "./AnimeCardImage";
 import { getPopularAnime } from "../services/animeService";
+import { FALLBACK_POPULAR_ANIME } from "../data/fallbackAnime";
 
 interface HomeViewProps {
   setView: (view: string) => void;
@@ -19,33 +21,41 @@ export default function HomeView({
   favorites,
   toggleFavorite
 }: HomeViewProps) {
-  const [popularAnime, setPopularAnime] = useState<AnimeMedia[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [popularAnime, setPopularAnime] = useState<AnimeMedia[]>(FALLBACK_POPULAR_ANIME);
+  const [loading, setLoading] = useState(false);
   const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
     async function loadPopular() {
       try {
         const data = await getPopularAnime(12);
-        setPopularAnime(data);
+        if (isMounted && data && data.length > 0) {
+          setPopularAnime(data);
+        }
       } catch (error) {
         console.error("Failed to load popular anime list:", error);
-      } finally {
-        setLoading(false);
       }
     }
     loadPopular();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const genres = [
     { name: "バトル・アクション", queryName: "Action", icon: "⚔️", color: "from-amber-400 to-orange-500" },
     { name: "恋愛・ラブコメ", queryName: "Romance", icon: "❤️", color: "from-pink-400 to-rose-500" },
     { name: "感動・ドラマ", queryName: "Drama", icon: "😭", color: "from-indigo-400 to-purple-500" },
-    { name: "日常・コメディ", queryName: "Comedy", icon: "🍀", color: "from-emerald-400 to-teal-500" },
-    { name: "推理・ミステリー", queryName: "Mystery", icon: "🔍", color: "from-violet-400 to-indigo-500" },
-    { name: "SF・サイバーパンク", queryName: "Sci-Fi", icon: "🚀", color: "from-cyan-400 to-blue-500" },
+    { name: "コメディ・ギャグ", queryName: "Comedy", icon: "🤣", color: "from-emerald-400 to-teal-500" },
+    { name: "日常・ほのぼの", queryName: "Slice of Life", icon: "🍀", color: "from-green-400 to-emerald-600" },
     { name: "ファンタジー・異世界", queryName: "Fantasy", icon: "🪄", color: "from-yellow-400 to-amber-600" },
+    { name: "SF・サイバーパンク", queryName: "Sci-Fi", icon: "🚀", color: "from-cyan-400 to-blue-500" },
+    { name: "推理・ミステリー", queryName: "Mystery", icon: "🔍", color: "from-violet-400 to-indigo-500" },
     { name: "スポーツ・熱血", queryName: "Sports", icon: "⚽", color: "from-red-400 to-rose-600" },
+    { name: "サスペンス・スリラー", queryName: "Thriller", icon: "⚡", color: "from-zinc-500 to-gray-800" },
+    { name: "音楽・バンド", queryName: "Music", icon: "🎵", color: "from-fuchsia-400 to-pink-600" },
+    { name: "冒険・アドベンチャー", queryName: "Adventure", icon: "🧭", color: "from-amber-500 to-yellow-600" },
   ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -245,7 +255,7 @@ export default function HomeView({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-            {(popularAnime || []).filter((anime) => anime && anime.id).map((anime) => {
+            {(popularAnime.length > 0 ? popularAnime : FALLBACK_POPULAR_ANIME).filter((anime) => anime && anime.id).map((anime) => {
               const mainTitle = anime.title?.native || anime.title?.userPreferred || anime.title?.english || anime.title?.romaji || "作品名未設定";
               const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : null;
               const isFav = favorites.includes(anime.id);
@@ -261,18 +271,7 @@ export default function HomeView({
                     onClick={() => selectAnime(anime.id)}
                     className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-gray-50 cursor-pointer"
                   >
-                    {anime.coverImage?.large ? (
-                      <img
-                        src={anime.coverImage.large}
-                        alt={mainTitle}
-                        referrerPolicy="no-referrer"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400 text-xs">
-                        No Image
-                      </div>
-                    )}
+                    <AnimeCardImage anime={anime} />
 
                     {/* Dark gradient overlap */}
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">

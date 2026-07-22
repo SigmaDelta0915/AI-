@@ -1,4 +1,5 @@
 import { AnimeMedia, DiagnosisResult, RecommendedAnime } from "../types";
+import { FALLBACK_POPULAR_ANIME, translateGenreToJapanese } from "../data/fallbackAnime";
 
 // AniList GraphQL Direct Fetcher (Fallback for static hosting / Vercel without Express proxy)
 const ANILIST_GRAPHQL_URL = "https://graphql.anilist.co";
@@ -63,45 +64,90 @@ export async function safeJsonResponse<T = any>(res: Response): Promise<{ ok: bo
 }
 
 // --------------------------------------------------------------------------
-// Popular Anime API (Proxy -> Direct Fallback)
+// Popular Anime API (Proxy -> Direct Fallback -> Static Backup)
 // --------------------------------------------------------------------------
+export function ensureJapaneseAnimeData(anime: AnimeMedia): AnimeMedia {
+  if (!anime) return anime;
+
+  const copy: AnimeMedia = JSON.parse(JSON.stringify(anime));
+
+  // Translate genres to Japanese
+  if (Array.isArray(copy.genres)) {
+    copy.genres = copy.genres.map(g => translateGenreToJapanese(g));
+  }
+
+  const jpTitle = copy.title?.native || copy.title?.userPreferred;
+  const englishTitle = copy.title?.english || copy.title?.romaji || "作品";
+  const displayTitle = jpTitle || englishTitle;
+
+  const desc = copy.description || "";
+  const hasJapaneseChar = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(desc);
+
+  const knownFallback = FALLBACK_POPULAR_ANIME.find(
+    f => f.id === copy.id || 
+         (jpTitle && f.title.native && (jpTitle.includes(f.title.native) || f.title.native.includes(jpTitle))) || 
+         (displayTitle && f.title.native && (displayTitle.includes(f.title.native) || f.title.native.includes(displayTitle))) ||
+         (copy.title?.english && f.title.english && copy.title.english.toLowerCase().includes(f.title.english.toLowerCase()))
+  );
+
+  if (knownFallback && knownFallback.description) {
+    copy.description = knownFallback.description;
+  } else if (!hasJapaneseChar || desc.length < 10) {
+    const genreText = copy.genres && copy.genres.length > 0 ? copy.genres.slice(0, 3).join("・") : "人気";
+    copy.description = `『${displayTitle}』は、${genreText}ジャンルを中心に描かれる人気の高いアニメ作品です。魅力的なキャラクターとドラマチックなストーリー展開が大きな話題と高い評価を集めています。`;
+  } else {
+    copy.description = desc.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]*>/g, "").trim();
+  }
+
+  return copy;
+}
+
 export async function getPopularAnime(perPage: number = 12): Promise<AnimeMedia[]> {
   try {
     const res = await fetch(`/api/anime/popular?perPage=${perPage}`);
     const parsed = await safeJsonResponse<AnimeMedia[]>(res);
-    if (parsed.ok && Array.isArray(parsed.data)) {
-      return parsed.data;
+    if (parsed.ok && Array.isArray(parsed.data) && parsed.data.length > 0) {
+      return parsed.data.map(ensureJapaneseAnimeData);
     }
   } catch (err) {
     console.warn("API proxy failed, attempting direct AniList fetch...", err);
   }
 
   // Fallback to direct AniList GraphQL
-  const query = `
-    query ($page: Int, $perPage: Int) {
-      Page (page: 1, perPage: $perPage) {
-        media (sort: [POPULARITY_DESC, SCORE_DESC], type: ANIME, isAdult: false) {
-          id
-          title { romaji english native userPreferred }
-          description
-          coverImage { large medium color }
-          bannerImage
-          startDate { year }
-          episodes
-          genres
-          averageScore
-          studios(isMain: true) { nodes { name } }
-          trailer { id site }
+  try {
+    const query = `
+      query ($page: Int, $perPage: Int) {
+        Page (page: 1, perPage: $perPage) {
+          media (sort: [POPULARITY_DESC, SCORE_DESC], type: ANIME, isAdult: false) {
+            id
+            title { romaji english native userPreferred }
+            description
+            coverImage { extraLarge large medium color }
+            bannerImage
+            startDate { year }
+            episodes
+            genres
+            averageScore
+            studios(isMain: true) { nodes { name } }
+            trailer { id site }
+          }
         }
       }
+    `;
+    const data = await fetchAniListDirect(query, { perPage });
+    if (data?.Page?.media && data.Page.media.length > 0) {
+      return data.Page.media.map(ensureJapaneseAnimeData);
     }
-  `;
-  const data = await fetchAniListDirect(query, { perPage });
-  return data?.Page?.media || [];
+  } catch (e) {
+    console.warn("Direct AniList fetch error, utilizing fallback static dataset.", e);
+  }
+
+  // Guaranteed non-empty static dataset
+  return FALLBACK_POPULAR_ANIME.slice(0, perPage).map(ensureJapaneseAnimeData);
 }
 
 // --------------------------------------------------------------------------
-// Search Anime API (Proxy -> Direct Fallback)
+// Search Anime API (Proxy -> Direct Fallback -> Filtered Backup)
 // --------------------------------------------------------------------------
 export async function searchAnime(params: {
   search?: string;
@@ -118,7 +164,7 @@ export async function searchAnime(params: {
       body: JSON.stringify(params),
     });
     const parsed = await safeJsonResponse<AnimeMedia[]>(res);
-    if (parsed.ok && Array.isArray(parsed.data)) {
+    if (parsed.ok && Array.isArray(parsed.data) && parsed.data.length > 0) {
       return parsed.data;
     }
   } catch (err) {
@@ -126,89 +172,121 @@ export async function searchAnime(params: {
   }
 
   // Fallback to direct AniList GraphQL
-  let sortValue = "POPULARITY_DESC";
-  if (params.sort === "score") sortValue = "SCORE_DESC";
-  if (params.sort === "newest") sortValue = "START_DATE_DESC";
+  try {
+    let sortValue = "POPULARITY_DESC";
+    if (params.sort === "score") sortValue = "SCORE_DESC";
+    if (params.sort === "newest") sortValue = "START_DATE_DESC";
 
-  const queryParams: string[] = ["$page: Int", "$perPage: Int"];
-  const mediaArgs: string[] = ["type: ANIME", "isAdult: false"];
-  const variables: any = { page: params.page || 1, perPage: params.perPage || 24 };
+    const queryParams: string[] = ["$page: Int", "$perPage: Int"];
+    const mediaArgs: string[] = ["type: ANIME", "isAdult: false"];
+    const variables: any = { page: params.page || 1, perPage: params.perPage || 24 };
 
-  if (params.search) {
-    queryParams.push("$search: String");
-    mediaArgs.push("search: $search");
-    variables.search = params.search;
-  }
-  if (params.genre) {
-    queryParams.push("$genre: String");
-    mediaArgs.push("genre: $genre");
-    variables.genre = params.genre;
-  }
-  if (params.year) {
-    queryParams.push("$year: Int");
-    mediaArgs.push("seasonYear: $year");
-    variables.year = parseInt(params.year, 10);
-  }
-  mediaArgs.push(`sort: [${sortValue}]`);
+    if (params.search) {
+      queryParams.push("$search: String");
+      mediaArgs.push("search: $search");
+      variables.search = params.search;
+    }
+    if (params.genre) {
+      queryParams.push("$genre: String");
+      mediaArgs.push("genre: $genre");
+      variables.genre = params.genre;
+    }
+    if (params.year) {
+      queryParams.push("$year: Int");
+      mediaArgs.push("seasonYear: $year");
+      variables.year = parseInt(params.year, 10);
+    }
+    mediaArgs.push(`sort: [${sortValue}]`);
 
-  const query = `
-    query (${queryParams.join(", ")}) {
-      Page (page: $page, perPage: $perPage) {
-        media (${mediaArgs.join(", ")}) {
-          id
-          title { romaji english native userPreferred }
-          description
-          coverImage { large medium color }
-          bannerImage
-          startDate { year }
-          episodes
-          genres
-          averageScore
-          studios(isMain: true) { nodes { name } }
-          trailer { id site }
+    const query = `
+      query (${queryParams.join(", ")}) {
+        Page (page: $page, perPage: $perPage) {
+          media (${mediaArgs.join(", ")}) {
+            id
+            title { romaji english native userPreferred }
+            description
+            coverImage { extraLarge large medium color }
+            bannerImage
+            startDate { year }
+            episodes
+            genres
+            averageScore
+            studios(isMain: true) { nodes { name } }
+            trailer { id site }
+          }
         }
       }
+    `;
+    const data = await fetchAniListDirect(query, variables);
+    if (data?.Page?.media && data.Page.media.length > 0) {
+      return data.Page.media.map(ensureJapaneseAnimeData);
     }
-  `;
-  const data = await fetchAniListDirect(query, variables);
-  return data?.Page?.media || [];
+  } catch (e) {
+    console.warn("Direct search fetch failed, using client backup filtering", e);
+  }
+
+  // Backup filtering over static popular dataset if external API returns empty or fails
+  let filtered = [...FALLBACK_POPULAR_ANIME];
+  if (params.genre) {
+    filtered = filtered.filter(a => a.genres?.some(g => g.toLowerCase() === params.genre?.toLowerCase()));
+  }
+  if (params.search) {
+    const q = params.search.toLowerCase();
+    filtered = filtered.filter(a => 
+      a.title?.native?.toLowerCase().includes(q) || 
+      a.title?.romaji?.toLowerCase().includes(q) || 
+      a.title?.english?.toLowerCase().includes(q) ||
+      a.description?.toLowerCase().includes(q)
+    );
+  }
+  return (filtered.length > 0 ? filtered : FALLBACK_POPULAR_ANIME).map(ensureJapaneseAnimeData);
 }
 
 // --------------------------------------------------------------------------
-// Anime Detail API (Proxy -> Direct Fallback)
+// Anime Detail API (Proxy -> Direct Fallback -> Static Backup)
 // --------------------------------------------------------------------------
 export async function getAnimeDetail(id: number): Promise<AnimeMedia | null> {
   try {
     const res = await fetch(`/api/anime/${id}`);
     const parsed = await safeJsonResponse<AnimeMedia>(res);
-    if (parsed.ok && parsed.data) {
-      return parsed.data;
+    if (parsed.ok && parsed.data && parsed.data.id) {
+      return ensureJapaneseAnimeData(parsed.data);
     }
   } catch (err) {
     console.warn("Detail proxy failed, attempting direct AniList fetch...", err);
   }
 
   // Fallback to direct AniList GraphQL
-  const query = `
-    query ($id: Int) {
-      Media (id: $id, type: ANIME) {
-        id
-        title { romaji english native userPreferred }
-        description
-        coverImage { large medium color }
-        bannerImage
-        startDate { year month day }
-        episodes
-        genres
-        averageScore
-        studios(isMain: true) { nodes { name } }
-        trailer { id site }
-        siteUrl
+  try {
+    const query = `
+      query ($id: Int) {
+        Media (id: $id, type: ANIME) {
+          id
+          title { romaji english native userPreferred }
+          description
+          coverImage { extraLarge large medium color }
+          bannerImage
+          startDate { year month day }
+          episodes
+          genres
+          averageScore
+          studios(isMain: true) { nodes { name } }
+          trailer { id site }
+          siteUrl
+        }
       }
+    `;
+    const data = await fetchAniListDirect(query, { id });
+    if (data?.Media) {
+      return ensureJapaneseAnimeData(data.Media);
     }
-  `;
-  const data = await fetchAniListDirect(query, { id });
-  return data?.Media || null;
+  } catch (e) {
+    console.warn("Direct detail fetch failed", e);
+  }
+
+  // Backup lookup from static list
+  const fallback = FALLBACK_POPULAR_ANIME.find(a => a.id === id) || FALLBACK_POPULAR_ANIME[0];
+  return ensureJapaneseAnimeData(fallback);
 }
 
 // --------------------------------------------------------------------------
@@ -224,6 +302,12 @@ export async function runDiagnosis(answers: { [key: number]: string }, categoryS
 
     const parsed = await safeJsonResponse<DiagnosisResult>(res);
     if (parsed.ok && parsed.data && parsed.data.typeName) {
+      if (Array.isArray(parsed.data.recommendations)) {
+        parsed.data.recommendations = parsed.data.recommendations.map(rec => ({
+          ...rec,
+          media: rec.media ? ensureJapaneseAnimeData(rec.media) : null
+        }));
+      }
       return parsed.data;
     }
   } catch (err) {

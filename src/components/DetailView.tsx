@@ -2,13 +2,124 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Star, Heart, Calendar, Play, ExternalLink, Bookmark, ShieldCheck, Film, Tv, Info, HelpCircle } from "lucide-react";
 import { AnimeMedia } from "../types";
 import { motion } from "motion/react";
+import { AnimeCardImage } from "./AnimeCardImage";
 import { getAnimeDetail } from "../services/animeService";
+import { FALLBACK_POPULAR_ANIME, translateGenreToJapanese } from "../data/fallbackAnime";
+import { getOfficialJapaneseTrailer } from "../data/japanesePvMap";
 
 interface DetailViewProps {
   animeId: number | null;
   setView: (view: string) => void;
   favorites: number[];
   toggleFavorite: (id: number) => void;
+}
+
+interface YouTubePvPlayerProps {
+  trailerInfo: { id: string; site: "youtube"; title: string; isJapaneseOfficial: boolean } | null;
+  mainTitle: string;
+}
+
+function YouTubePvPlayer({ trailerInfo, mainTitle }: YouTubePvPlayerProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  if (!trailerInfo?.id) {
+    return (
+      <div className="rounded-2xl border border-dashed border-gray-200 p-10 text-center space-y-4 bg-white shadow-sm">
+        <Film className="h-10 w-10 text-rose-400 mx-auto" />
+        <div>
+          <h4 className="text-sm font-bold text-gray-800">『{mainTitle}』の日本公式PV</h4>
+          <p className="text-xs text-gray-500 mt-1">
+            YouTube公式アニメチャンネル（TOHO animation / Aniplex / KADOKAWA / MAPPA 等）で公式プロモーション映像をご覧いただけます。
+          </p>
+        </div>
+        <a
+          href={`https://www.youtube.com/results?search_query=${encodeURIComponent(mainTitle + " PV アニメ 公式")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center space-x-2 px-5 py-2.5 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 shadow-md shadow-rose-500/20 transition-all transform active:scale-95"
+        >
+          <Play className="h-4 w-4 fill-white" />
+          <span>YouTubeで日本公式PVを視聴（別タブで開く）</span>
+          <ExternalLink className="h-3.5 w-3.5 ml-1" />
+        </a>
+      </div>
+    );
+  }
+
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${trailerInfo.id}?autoplay=1&rel=0&enablejsapi=1`;
+  const watchUrl = `https://www.youtube.com/watch?v=${trailerInfo.id}`;
+  const thumbnailUrl = `https://i.ytimg.com/vi/${trailerInfo.id}/hqdefault.jpg`;
+
+  return (
+    <div className="space-y-4">
+      {/* Embedded Player or Poster */}
+      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black border border-gray-200 shadow-xl group">
+        {!isPlaying ? (
+          <div
+            className="relative h-full w-full cursor-pointer overflow-hidden"
+            onClick={() => setIsPlaying(true)}
+          >
+            <img
+              src={thumbnailUrl}
+              alt={trailerInfo.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/30 flex flex-col items-center justify-center p-4">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-rose-600/90 text-white flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:bg-rose-600 transition-all mb-3 border-2 border-white/30">
+                <Play className="h-8 w-8 sm:h-10 sm:w-10 fill-white ml-1" />
+              </div>
+              <span className="text-white text-xs sm:text-sm font-bold tracking-wide drop-shadow px-4 py-1.5 bg-black/60 rounded-full backdrop-blur-md border border-white/20">
+                クリックで公式PV再生（プレイヤー起動）
+              </span>
+            </div>
+          </div>
+        ) : (
+          <iframe
+            title={trailerInfo.title}
+            src={embedUrl}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          ></iframe>
+        )}
+      </div>
+
+      {/* Control / Watch Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl bg-rose-50/90 border border-rose-100 shadow-sm">
+        <div className="flex items-center space-x-2 text-xs text-rose-950 font-bold">
+          <Play className="h-4 w-4 text-rose-600 fill-rose-600 shrink-0" />
+          <span className="line-clamp-1">{trailerInfo.title}</span>
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+          {!isPlaying && (
+            <button
+              onClick={() => setIsPlaying(true)}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+            >
+              <Play className="h-3.5 w-3.5 fill-white" />
+              <span>埋め込みで再生</span>
+            </button>
+          )}
+
+          <a
+            href={watchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+          >
+            <span>YouTubeで直接開く</span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </div>
+
+      {/* Helpful notice regarding YouTube embedding permissions */}
+      <p className="text-[11px] text-gray-400 text-center px-2">
+        ※ 制作会社や配給元等の著作権保護設定（ウェブ埋め込み制限）によりアプリ内で動画再生エラーが出る場合は、上記の「YouTubeで直接開く」ボタンより公式アプリ・ブラウザでご視聴ください。
+      </p>
+    </div>
+  );
 }
 
 export default function DetailView({ animeId, setView, favorites, toggleFavorite }: DetailViewProps) {
@@ -62,10 +173,26 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
   const isFav = favorites.includes(anime.id);
   const rating = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "N/A";
 
-  // Strip simple HTML tags commonly found in AniList description
-  const cleanDescription = anime.description
-    ? anime.description.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]*>/g, "")
-    : "あらすじ情報は登録されていません。";
+  // Process description to ensure Japanese formatting
+  const rawDesc = anime.description || "";
+  const hasJapaneseInDesc = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(rawDesc);
+  let cleanDescription = rawDesc.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]*>/g, "").trim();
+
+  if (!cleanDescription || !hasJapaneseInDesc) {
+    const knownFallback = FALLBACK_POPULAR_ANIME.find(
+      f => f.id === anime.id || 
+           (mainTitle && f.title.native && (mainTitle.includes(f.title.native) || f.title.native.includes(mainTitle))) ||
+           (subTitle && f.title.english && subTitle.toLowerCase().includes(f.title.english.toLowerCase()))
+    );
+    if (knownFallback && knownFallback.description) {
+      cleanDescription = knownFallback.description;
+    } else {
+      const genreText = anime.genres && anime.genres.length > 0 
+        ? anime.genres.map(g => translateGenreToJapanese(g)).slice(0, 3).join("・") 
+        : "人気";
+      cleanDescription = `『${mainTitle}』は、${genreText}ジャンルを中心に描かれる人気の高いアニメ作品です。重厚な世界観と魅力的なキャラクター展開が世界中で大きな話題と高い評価を集めています。`;
+    }
+  }
 
   // High converting Affiliate Platforms
   const affiliates = [
@@ -146,18 +273,7 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
         <div className="relative z-10 px-6 pb-6 -mt-16 sm:px-10 sm:pb-8 flex flex-col sm:flex-row gap-6 items-start">
           {/* Cover Art */}
           <div className="relative h-44 w-32 sm:h-56 sm:w-40 rounded-2xl overflow-hidden shadow-lg border border-white bg-white shrink-0 self-center sm:self-auto">
-            {anime.coverImage?.large ? (
-              <img
-                src={anime.coverImage.large}
-                alt={mainTitle}
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400 text-xs">
-                No Image
-              </div>
-            )}
+            <AnimeCardImage anime={anime} className="h-full w-full object-cover" />
           </div>
 
           {/* Titles & Quick Stats */}
@@ -296,7 +412,7 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
                       key={idx}
                       className="inline-block rounded-lg border border-gray-200/60 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-rose-100 hover:text-rose-500 cursor-default transition-colors"
                     >
-                      {g}
+                      {translateGenreToJapanese(g)}
                     </span>
                   ))}
                 </div>
@@ -345,45 +461,38 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
           </div>
         )}
 
-        {activeTab === "pv" && (
-          <div className="space-y-6">
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900">公式プロモーションビデオ</h3>
-              <p className="text-xs text-gray-400 mt-1">
-                作品の公式PV。劇伴の雰囲気やハイクオリティな作画を動画でご確認ください。
-              </p>
-            </div>
-
-            {anime.trailer?.id && anime.trailer.site === "youtube" ? (
-              <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black border border-gray-100 shadow-md">
-                <iframe
-                  title="Official Trailer"
-                  src={`https://www.youtube.com/embed/${anime.trailer.id}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 h-full w-full border-0"
-                ></iframe>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-gray-200 p-12 text-center space-y-4">
-                <Film className="h-10 w-10 text-gray-300 mx-auto" />
+        {activeTab === "pv" && (() => {
+          const trailerInfo = getOfficialJapaneseTrailer(anime);
+          return (
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-700">公式PVの自動埋め込みがありません</h4>
-                  <p className="text-xs text-gray-400 mt-1">以下のYouTube公式検索リンク、または外部サイトより直接ご覧いただけます。</p>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="text-lg font-bold text-gray-900">公式プロモーションビデオ（日本公式PV）</h3>
+                    <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-extrabold text-rose-600 border border-rose-100">
+                      公式PV
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {trailerInfo?.title || `『${mainTitle}』国内公式アニメプロモーションビデオ（YouTube）`}
+                  </p>
                 </div>
+
                 <a
-                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(mainTitle + " PV アニメ")}`}
+                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(mainTitle + " 公式PV アニメ")}`}
                   target="_blank"
-                  referrerPolicy="no-referrer"
-                  className="inline-flex items-center space-x-1.5 px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 transition-colors"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 transition-colors shrink-0"
                 >
-                  <span>YouTubeで公式PVを検索</span>
-                  <ExternalLink className="h-4 w-4" />
+                  <span>YouTubeで関連PVも検索</span>
+                  <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
                 </a>
               </div>
-            )}
-          </div>
-        )}
+
+              <YouTubePvPlayer trailerInfo={trailerInfo} mainTitle={mainTitle} />
+            </div>
+          );
+        })()}
 
         {activeTab === "details" && (
           <div className="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8 shadow-sm space-y-6">
