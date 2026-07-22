@@ -226,12 +226,6 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
                 <span className="text-[10px] text-amber-600/70 font-normal">/ 10</span>
               </div>
 
-              {anime.episodes && (
-                <div className="rounded-xl bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-700 border border-gray-200/70 shadow-sm">
-                  全 {anime.episodes} 話
-                </div>
-              )}
-
               {anime.studios?.nodes?.[0]?.name && (
                 <div className="flex items-center space-x-1 rounded-xl bg-purple-50 px-3 py-1.5 text-xs font-bold text-purple-700 border border-purple-100 shadow-sm">
                   <Building2 className="h-3.5 w-3.5 text-purple-600" />
@@ -397,11 +391,6 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
                       ? `${anime.startDate.year}年 ${anime.startDate.month || 1}月 ${anime.startDate.day || 1}日`
                       : "未定"}
                   </dd>
-                </div>
-
-                <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 flex justify-between items-center">
-                  <dt className="font-semibold text-gray-500 text-xs">エピソード数</dt>
-                  <dd className="text-gray-900 font-bold text-sm text-right">{anime.episodes ? `${anime.episodes} 話` : "放送中 / 未発表"}</dd>
                 </div>
 
                 <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 flex justify-between items-center">

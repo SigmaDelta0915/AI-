@@ -27,11 +27,11 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
   if (cover?.large) rawUrls.push(cover.large);
   if (cover?.medium) rawUrls.push(cover.medium);
 
-  // Generate fallback sources: Proxied first for stability, then direct URLs
+  // Generate candidate sources: direct URL first for speed, then proxy if needed
   const sources: string[] = [];
   rawUrls.forEach((url) => {
-    sources.push(`/api/image-proxy?url=${encodeURIComponent(url)}`);
     sources.push(url);
+    sources.push(`/api/image-proxy?url=${encodeURIComponent(url)}`);
   });
 
   const [sourceIndex, setSourceIndex] = useState(0);
@@ -85,7 +85,7 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
             <span>{anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "8.5"}</span>
           </div>
           <span className="text-[10px] text-gray-400">
-            {anime.episodes ? `全${anime.episodes}話` : "公式配信"}
+            公式アニメ
           </span>
         </div>
       </div>
