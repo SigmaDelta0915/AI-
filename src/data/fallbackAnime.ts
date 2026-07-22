@@ -20,12 +20,12 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・ヒンメルの言葉や仲間との思い出が、現在の旅路と美しく交錯する緻密なストーリー構成
 ・圧倒的な魔法戦のアクション描写と、静かで情緒あふれる日常表現のコントラスト`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-82gsc876mK4A.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-82gsc876mK4A.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b154587-82gsc876mK4A.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-qQTzQnEJJ3oB.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx154587-qQTzQnEJJ3oB.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx154587-qQTzQnEJJ3oB.jpg",
       color: "#e0e7ff",
     },
-    bannerImage: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/154587-k2G8M8O25V5K.jpg",
+    bannerImage: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/154587-ivXNJ23SM1xB.jpg",
     startDate: { year: 2023, month: 9, day: 29 },
     episodes: 28,
     genres: ["Fantasy", "Adventure", "Drama"],
@@ -50,9 +50,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・原作：赤坂アカ×横槍メンゴのタッグが贈る圧倒的な展開と巧みな伏線回収
 ・YOASOBIによる主題歌「アイドル」的世界的現象と、動画工房による圧巻の作画・ライブ演出`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx150672-P2gM0x52j445.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx150672-P2gM0x52j445.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b150672-P2gM0x52j445.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx150672-WqmmwZ4nMzAy.png",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx150672-WqmmwZ4nMzAy.png",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx150672-WqmmwZ4nMzAy.png",
       color: "#ec4899",
     },
     startDate: { year: 2023, month: 4, day: 12 },
@@ -79,9 +79,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・猫猫（CV: 悠木碧）と美貌の宦官・壬氏（CV: 大塚剛央）の独特で軽妙な掛け合い
 ・色彩豊かな美しい宮廷の美意識と、後宮を取り巻く人間ドラマの重厚な描写`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx161645-a764P9727M1R.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx161645-a764P9727M1R.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b161645-a764P9727M1R.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx161645-QLbzHXiYRgV2.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx161645-QLbzHXiYRgV2.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx161645-QLbzHXiYRgV2.jpg",
       color: "#10b981",
     },
     startDate: { year: 2023, month: 10, day: 22 },
@@ -108,9 +108,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・和風の情緒あふれる音楽・美術と、胸を打つ人間ドラマ・家族愛
 ・個性豊かな柱（最高位剣士）たちや魅力あふれるキャラクター陣の活躍`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101922-W3TraceB4Cze.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101922-W3TraceB4Cze.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b101922-W3TraceB4Cze.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101922-WBsBl0ClmgYL.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx101922-WBsBl0ClmgYL.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx101922-WBsBl0ClmgYL.jpg",
       color: "#f43f5e",
     },
     startDate: { year: 2019, month: 4, day: 6 },
@@ -137,9 +137,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・「領域展開」をはじめとする洗練された呪術バトルシステムと設定の深み
 ・五条悟をはじめ、圧倒的カリスマと魅力を備えた登場人物たち`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113415-9A2292S1a76M.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113415-9A2292S1a76M.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b113415-9A2292S1a76M.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113415-LHBAeoZDIsnF.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx113415-LHBAeoZDIsnF.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx113415-LHBAeoZDIsnF.jpg",
       color: "#6366f1",
     },
     startDate: { year: 2020, month: 10, day: 3 },
@@ -166,9 +166,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・「結束バンド」による本格的なロックサウンドと、下北沢のリアルなライブハウス文化の丁寧な描写
 ・陰キャ少女が音楽と仲間を通じて少しずつ自己表現と「一歩」を踏み出していく青春成長劇`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-k2F7J9kM3R9X.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-k2F7J9kM3R9X.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b130003-k2F7J9kM3R9X.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-HTDmeL4RGeJ4.png",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx130003-HTDmeL4RGeJ4.png",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx130003-HTDmeL4RGeJ4.png",
       color: "#f59e0b",
     },
     startDate: { year: 2022, month: 10, day: 9 },
@@ -195,9 +195,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・「偽りの家族」が本当の絆と温もりを育んでいく心温まるストーリー展開
 ・WIT STUDIO×CloverWorksの豪華共同制作によるスタイリッシュな美術とハイレベルな作画`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-aR8m8A7G0M11.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-aR8m8A7G0M11.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b140960-aR8m8A7G0M11.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-Kb6R5nYQfjmP.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx140960-Kb6R5nYQfjmP.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx140960-Kb6R5nYQfjmP.jpg",
       color: "#06b6d4",
     },
     startDate: { year: 2022, month: 4, day: 9 },
@@ -224,9 +224,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・立体機動装置によるスピード感あふれる縦横無尽の立体戦闘アクション表現
 ・澤野弘之・KOHTA YAMAMOTOが手掛ける壮大で荘厳な劇伴音楽と重厚な人間ドラマ`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-C6P8M82S2K9M.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-C6P8M82S2K9M.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b16498-C6P8M82S2K9M.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-buvcRTBx4NSm.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx16498-buvcRTBx4NSm.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx16498-buvcRTBx4NSm.jpg",
       color: "#71717a",
     },
     startDate: { year: 2013, month: 4, day: 7 },
@@ -253,9 +253,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・毎話ごとにエンディング楽曲＆映像が変わる前代未聞の豪華アーティストコラボレーション
 ・既存のヒーロー像を覆すデンジの生々しい欲望と、ダークで不条理な世界観の圧倒的インパクト`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-22D80S31c51M.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-22D80S31c51M.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b127230-22D80S31c51M.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-DdP4vAdssLoz.png",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx127230-DdP4vAdssLoz.png",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx127230-DdP4vAdssLoz.png",
       color: "#ef4444",
     },
     startDate: { year: 2022, month: 10, day: 12 },
@@ -282,9 +282,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・敵味方問わずすべてのキャラクターにドラマがあり、成長と葛藤が丁寧に描かれる熱血青春劇
 ・ボールの効果音やコートの響き、声優陣の熱演が一体となった胸を打つ試合描写`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20464-927aO1M2b64a.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20464-927aO1M2b64a.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b20464-927aO1M2b64a.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20464-ooZUyBe4ptp9.png",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20464-ooZUyBe4ptp9.png",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx20464-ooZUyBe4ptp9.png",
       color: "#f97316",
     },
     startDate: { year: 2014, month: 4, day: 6 },
@@ -311,9 +311,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・「無個性」の少年が努力と仲間との絆で真のヒーローへと登りつめる王道胸熱ストーリー
 ・個性豊かなキャラクターたちの能力を活かした戦術と、思想がぶつかり合う重厚なドラマ`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21459-Yv2M6M2Z83C5.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21459-Yv2M6M2Z83C5.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b21459-Yv2M6M2Z83C5.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21459-nYh85uj2Fuwr.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx21459-nYh85uj2Fuwr.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx21459-nYh85uj2Fuwr.jpg",
       color: "#22c55e",
     },
     startDate: { year: 2016, month: 4, day: 3 },
@@ -340,9 +340,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・コスプレ衣装作りの工程や型紙採寸など、モノづくりの面白さと奥深さをリアルに描写
 ・オタク趣味への真っ直ぐな肯定とリスペクトが詰まった、爽やかでキュンとする青春ドラマ`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx132405-b01J3L0K274a.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx132405-b01J3L0K274a.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b132405-b01J3L0K274a.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx132405-qP7FQYGmNI3d.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx132405-qP7FQYGmNI3d.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx132405-qP7FQYGmNI3d.jpg",
       color: "#e879f9",
     },
     startDate: { year: 2022, month: 1, day: 9 },
@@ -369,9 +369,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・32歳のアラフォー男が泥臭く夢を追いかける爽快でエモーショナルな熱血ストーリー
 ・防衛隊のスタイリッシュな装備・兵器と怪獣パワーによる破壊的アクションの爽快感`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153288-G4mH04M16mX8.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153288-G4mH04M16mX8.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b153288-G4mH04M16mX8.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153288-25FBfFJzEQ5O.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx153288-25FBfFJzEQ5O.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx153288-25FBfFJzEQ5O.jpg",
       color: "#10b981",
     },
     startDate: { year: 2024, month: 4, day: 13 },
@@ -398,9 +398,9 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
 ・黒の組織・FBI・公安警察（安室透）など重厚で複雑に交錯するサスペンスドラマ
 ・劇場版シリーズでも絶大な人気を誇る、ド派手なアクションシーンとキャラクターの魅力`,
     coverImage: {
-      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx235-L68R78pS9M5R.jpg",
-      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx235-L68R78pS9M5R.jpg",
-      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b235-L68R78pS9M5R.jpg",
+      extraLarge: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx235-MyYT7K3chBdO.jpg",
+      large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx235-MyYT7K3chBdO.jpg",
+      medium: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx235-MyYT7K3chBdO.jpg",
       color: "#2563eb",
     },
     startDate: { year: 1996, month: 1, day: 8 },

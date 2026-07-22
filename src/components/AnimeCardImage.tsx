@@ -27,11 +27,11 @@ export const AnimeCardImage: React.FC<AnimeCardImageProps> = ({
   if (cover?.large) rawUrls.push(cover.large);
   if (cover?.medium) rawUrls.push(cover.medium);
 
-  // Generate candidate sources: direct URL first for speed, then proxy if needed
+  // Generate candidate sources: proxy first for reliable headers, then direct
   const sources: string[] = [];
   rawUrls.forEach((url) => {
-    sources.push(url);
     sources.push(`/api/image-proxy?url=${encodeURIComponent(url)}`);
+    sources.push(url);
   });
 
   const [sourceIndex, setSourceIndex] = useState(0);
