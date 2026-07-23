@@ -19,6 +19,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "カフェ巡りをしたり、お洒落な街へショッピングに出かける", scores: { romance: 3, drama: 2 } },
       { id: "C", text: "時間を忘れてガッツリとゲームをプレイし続ける", scores: { isekai: 3, sciFi: 2 } },
       { id: "D", text: "映画館で最新作を見たり、静かな美術館を散策する", scores: { mystery: 3, drama: 2 } },
+      { id: "E", text: "部屋を真っ暗にして重厚で鬱々とした濃密なアニメ世界に一人で没入する", scores: { depressive: 3, sciFi: 1 } },
     ],
   },
   {
@@ -29,6 +30,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "涙腺が崩壊するような、胸が締め付けられる深い感動", scores: { tear: 3, drama: 2 } },
       { id: "C", text: "張り巡らされた伏線や、謎が解き明かされる知の快感", scores: { mystery: 3, sciFi: 2 } },
       { id: "D", text: "クスッと笑えて肩の力が抜ける、日々の癒やしとリラックス", scores: { sliceOfLife: 3, comedy: 2 } },
+      { id: "E", text: "心がヒリヒリと沈み込むような、鬱展開・狂気・絶望感の揺さぶり", scores: { depressive: 3, drama: 2 } },
     ],
   },
   {
@@ -39,6 +41,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "森羅万象の真理を極める、冷静沈着な大賢者", scores: { isekai: 2, sciFi: 3 } },
       { id: "C", text: "王宮の難事件を影から解決する、頭脳派の宮廷探偵", scores: { mystery: 3 } },
       { id: "D", text: "宿場町で美味しい料理を振る舞う、のんびり食堂のオーナー", scores: { sliceOfLife: 3, comedy: 1 } },
+      { id: "E", text: "世界の残酷な理（ことわり）や理不尽な死に翻弄される孤独な観測者", scores: { depressive: 3, mystery: 1 } },
     ],
   },
   {
@@ -49,6 +52,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "常に沈着冷静、誰とも群れずに最善手を選ぶ一匹狼", scores: { mystery: 2, sciFi: 3 } },
       { id: "C", text: "凡人だけど優しさに溢れ、誰かのためにボロボロになれる人", scores: { tear: 3, romance: 2 } },
       { id: "D", text: "一見すると冴えないが、実は規格外の最強パワーを隠す実力者", scores: { isekai: 3, action: 2 } },
+      { id: "E", text: "絶望的な運命や理不尽な鬱展開の中で、葛藤し狂いそうになりながら耐える主人公", scores: { depressive: 3, tear: 1 } },
     ],
   },
   {
@@ -59,16 +63,18 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "登場人物の揺れ動く感情を、丁寧に丁寧に重ねて描く人間ドラマ", scores: { tear: 3, drama: 2 } },
       { id: "C", text: "特に重い出来事は起きず、のんびりとした時間が流れる空気感", scores: { sliceOfLife: 3 } },
       { id: "D", text: "何気ない会話がすべて後々の伏線になっているような緻密な構成", scores: { mystery: 3, sciFi: 2 } },
+      { id: "E", text: "平和に見えていた日常が徐々に狂いだし、一気に鬱展開へと転落していく怒濤のサスペンス", scores: { depressive: 3, mystery: 2 } },
     ],
   },
   {
     id: 6,
     question: "好きな「恋愛要素」の描き方は？",
     options: [
-      { id: "A", text: "見ていて恥ずかしくなるほど、お互い一途で甘酸っぱい純愛", scores: { romance: 3 } },
+      { id: "A", text: "見ていて恥ずかしくなるほど、お顔が赤くなる甘酸っぱい純愛", scores: { romance: 3 } },
       { id: "B", text: "すれ違いや試練を乗り越える、運命的で少し切ないラブストーリー", scores: { tear: 2, romance: 3 } },
       { id: "C", text: "つかず離れずの関係に、ついヤキモキしてしまうドタバタコメディ", scores: { comedy: 2, romance: 2 } },
       { id: "D", text: "恋愛要素は無し、またはストーリーを邪魔しない程度の隠し味で十分", scores: { action: 2, mystery: 2 } },
+      { id: "E", text: "愛ゆえの狂気や執着、死別や生々しい愛憎が渦巻くダークで重い人間模様", scores: { depressive: 3, drama: 2 } },
     ],
   },
   {
@@ -79,6 +85,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "背景美術や光の差し込みが、まるで実写映画のように美しい描写", scores: { tear: 2, drama: 2 } },
       { id: "C", text: "丸みがあって柔らかく、見ているだけで安心するようなタッチ", scores: { sliceOfLife: 3 } },
       { id: "D", text: "どこか退廃的でダーク、影が多めのシリアスで引き締まったタッチ", scores: { mystery: 2, sciFi: 3 } },
+      { id: "E", text: "歪んだ空間美や精神世界、薄暗く鬱々とした陰惨で独特な世界観タッチ", scores: { depressive: 3, mystery: 1 } },
     ],
   },
   {
@@ -89,6 +96,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "切なくも温かい余韻が残り、思わず深くため息をついてしまう結末", scores: { tear: 3, drama: 2 } },
       { id: "C", text: "度肝を抜かれる大どんでん返し。最後まで予測がつかない結末", scores: { mystery: 3, sciFi: 2 } },
       { id: "D", text: "特別な劇的変化はなく、これからも穏やかな毎日が続いていく結末", scores: { sliceOfLife: 3 } },
+      { id: "E", text: "心に大きな傷や重い課題を遺すような、救いのない完全ビター/鬱エンド", scores: { depressive: 3, drama: 1 } },
     ],
   },
   {
@@ -99,6 +107,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "アンドロイド、電脳世界、未来の宇宙船などが登場するSF世界", scores: { sciFi: 3 } },
       { id: "C", text: "私たちが暮らす現代の、どこにでもある学校やのどかな田舎町", scores: { sliceOfLife: 2, romance: 2 } },
       { id: "D", text: "史実をベースにしていたり、重厚な軍事・政治劇が繰り広げられる世界", scores: { drama: 3, mystery: 1 } },
+      { id: "E", text: "死と隣り合わせのディストピアや、人間の尊厳が踏みにじられる鬱々とした世界", scores: { depressive: 3, sciFi: 2 } },
     ],
   },
   {
@@ -109,6 +118,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "すれ違いや立場の違いで戦わねばならない、哀しき宿命のライバル", scores: { tear: 3, drama: 2 } },
       { id: "C", text: "部室やシェアハウスでみんなが楽しくくだらない話を交わす居場所", scores: { sliceOfLife: 3, comedy: 2 } },
       { id: "D", text: "言葉にしなくても行動で分かり合う、一見冷たいが絶対的な信頼", scores: { mystery: 2, sciFi: 2 } },
+      { id: "E", text: "共倒れや依存、共依存や狂気に満ちた背徳感のあるダークな人間関係", scores: { depressive: 3, drama: 1 } },
     ],
   },
   {
@@ -119,6 +129,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "程よい謎解きやスパイスとしてシリアスなサスペンスがあるのは好き", scores: { sciFi: 2, mystery: 1 } },
       { id: "C", text: "頭を使うより、ストレートで純粋に熱くなれる展開の方が好き", scores: { action: 2, isekai: 2 } },
       { id: "D", text: "争い事や謎は不要。終始ピースフルで平和であってほしい", scores: { sliceOfLife: 3 } },
+      { id: "E", text: "精神的に追い詰められる心理戦や、狂気が迫り来る心理ホラーサスペンスが好き", scores: { depressive: 3, mystery: 2 } },
     ],
   },
   {
@@ -129,6 +140,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "大切な仲間の喪失や、自分自身の弱さと向き合うといった内面の苦悩", scores: { tear: 3, drama: 2 } },
       { id: "C", text: "同じ夢を追うライバルと、お互いのプライドを懸けた極限の勝負", scores: { sports: 3 } },
       { id: "D", text: "ちょっとした勘違いや試験勉強、日常のごく些細なすれ違いトラブル", scores: { sliceOfLife: 2, comedy: 2 } },
+      { id: "E", text: "いくら抗っても逃れられない理不尽な死や惨劇、希望が打ち砕かれる残酷な鬱状況", scores: { depressive: 3, drama: 2 } },
     ],
   },
   {
@@ -139,6 +151,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "超重要。涙腺を極限まで刺激する、哀愁を帯びたストリングスや名曲", scores: { tear: 3, drama: 1 } },
       { id: "C", text: "重要。シーンに寄り添う、穏やかで心地よいLo-Fiやアコースティック", scores: { sliceOfLife: 3 } },
       { id: "D", text: "重要。不穏さや退廃的な近未来感を完璧に演出するインダストリアル調", scores: { mystery: 1, sciFi: 3 } },
+      { id: "E", text: "重要。不安や不気味さ、狂気と美しさが同居する独創的な劇伴・ダークソング", scores: { depressive: 3, mystery: 1 } },
     ],
   },
   {
@@ -149,6 +162,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "週末の午前中や晴れた午後、温かい飲み物を片手にリフレッシュ鑑賞", scores: { sliceOfLife: 3, romance: 2 } },
       { id: "C", text: "ご飯を食べながら、または作業用として適度なテンションでサクッと視聴", scores: { comedy: 2, isekai: 2 } },
       { id: "D", text: "とにかく泣きたい、熱くなりたいなど『感情を揺さぶられたい』時に一気見", scores: { tear: 3, drama: 2 } },
+      { id: "E", text: "気分が鬱々としている時・沈んでいる時、共鳴できるダークな世界に深く浸りたい時", scores: { depressive: 3, drama: 1 } },
     ],
   },
   {
@@ -159,6 +173,7 @@ const QUESTIONS: DiagnosisQuestion[] = [
       { id: "B", text: "哲学的で、現実の厳しさや人間の二面性などを描く大人向けの重厚な雰囲気", scores: { mystery: 2, sciFi: 3 } },
       { id: "C", text: "とにかくエモーショナル。登場人物の生きた証に深く感動できる雰囲気", scores: { tear: 3, drama: 2 } },
       { id: "D", text: "キャラクターたちが可愛らしく穏やかで、一切ストレスのない雰囲気", scores: { sliceOfLife: 3, comedy: 1 } },
+      { id: "E", text: "鬱展開やトラウマ描写、人間の闇や不都合な真実を直視する衝撃的な雰囲気", scores: { depressive: 3, drama: 2 } },
     ],
   },
 ];
@@ -177,6 +192,7 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
     sports: 0,
     comedy: 0,
     drama: 0,
+    depressive: 0,
   });
 
   const [diagnosing, setDiagnosing] = useState(false);

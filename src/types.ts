@@ -47,6 +47,7 @@ export interface DiagnosisOption {
     sports?: number;
     comedy?: number;
     drama?: number;
+    depressive?: number; // dark/depressive/psychological anime
   };
 }
 
