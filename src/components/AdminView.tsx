@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Settings, RefreshCw, Plus, Trash2, ShieldAlert, Check, Newspaper, Award, HelpCircle, Eye, Lock, KeyRound, LogOut, Loader2, Sparkles, Play, Wrench } from "lucide-react";
+import { Settings, RefreshCw, Plus, Trash2, ShieldAlert, Check, Newspaper, Award, HelpCircle, Eye, Lock, KeyRound, LogOut, Loader2, Sparkles, Play, Wrench, Globe, Search, FileText, Copy, ExternalLink } from "lucide-react";
 import { AdConfiguration, Notice } from "../types";
 import { motion } from "motion/react";
 import { safeJsonResponse } from "../services/animeService";
@@ -16,7 +16,7 @@ interface AdminViewProps {
 export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminAuthenticated, setIsAdminAuthenticated }: AdminViewProps) {
   const [successMsg, setSuccessMsg] = useState("");
   const [clearingCache, setClearingCache] = useState(false);
-  const [activeTab, setActiveTab] = useState<"ai-studio" | "notices" | "ads" | "system">("ai-studio");
+  const [activeTab, setActiveTab] = useState<"ai-studio" | "notices" | "ads" | "seo" | "system">("ai-studio");
 
   // Authentication state
   const [passcodeInput, setPasscodeInput] = useState(() => {
@@ -45,6 +45,8 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
   const [currentPasscode, setCurrentPasscode] = useState("");
   const [newPasscode, setNewPasscode] = useState("");
   const [newPasscodeConfirm, setNewPasscodeConfirm] = useState("");
+  const [gscTagInput, setGscTagInput] = useState("");
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [configError, setConfigError] = useState("");
 
@@ -84,6 +86,7 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
         setPromptTemplate(parsed.data.promptTemplate);
         setPromptTemplateInput(parsed.data.promptTemplate);
         setCurrentPasscode(parsed.data.currentPasscode);
+        setGscTagInput(parsed.data.gscVerificationTag || "");
         sessionStorage.setItem("active_admin_passcode", parsed.data.currentPasscode);
       }
     } catch (err) {
@@ -162,6 +165,7 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
           passcode: activePasscode,
           newPasscode: newPasscode || undefined,
           newPromptTemplate: promptTemplateInput,
+          newGscTag: gscTagInput,
         }),
       });
 
@@ -425,6 +429,17 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
         >
           <Newspaper className="h-4 w-4" />
           <span>お知らせ配信</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("seo")}
+          className={`flex items-center space-x-2 px-4 py-2.5 font-bold transition-all border-b-2 -mb-px whitespace-nowrap ${
+            activeTab === "seo"
+              ? "text-rose-500 border-rose-500 bg-rose-50/30 rounded-t-xl"
+              : "text-gray-400 border-transparent hover:text-gray-600 hover:bg-gray-50/50"
+          }`}
+        >
+          <Search className="h-4 w-4" />
+          <span>SEO ＆ Search Console</span>
         </button>
         <button
           onClick={() => setActiveTab("system")}
@@ -812,6 +827,184 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
                 )}
               </div>
             </div>
+          </motion.div>
+        )}
+
+        {/* TAB: SEO & GOOGLE SEARCH CONSOLE */}
+        {activeTab === "seo" && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6 text-left"
+          >
+            {/* Top GSC Card */}
+            <div className="bg-white dark:bg-slate-950 border border-gray-100 dark:border-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-slate-900">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-extrabold text-gray-900 dark:text-slate-100 flex items-center space-x-2">
+                    <Search className="h-5 w-5 text-rose-500" />
+                    <span>Google Search Console 連携＆所有権確認</span>
+                  </h2>
+                  <p className="text-xs text-gray-400">
+                    Google 検索でのインデックス登録、検索トラフィック・クリック数の分析、サイトマップの自動送信をサポートします。
+                  </p>
+                </div>
+                <a
+                  href="https://search.google.com/search-console/welcome"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 shrink-0 self-start sm:self-center"
+                >
+                  <span>Search Console を開く</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+
+              {/* Meta tag form */}
+              <form onSubmit={handleSaveConfig} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center justify-between">
+                    <span>Google サイト所有権確認メタタグ（または content 値）</span>
+                    <span className="text-[10px] text-gray-400 font-mono">例: abc123xyz_verification_code</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder='例: <meta name="google-site-verification" content="XXXXXXXXX" /> または XXXXXXXXX'
+                      value={gscTagInput}
+                      onChange={(e) => setGscTagInput(e.target.value)}
+                      className="w-full rounded-2xl border border-gray-200/80 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/30 py-3.5 px-4 text-xs font-mono outline-none focus:border-rose-400 focus:bg-white dark:focus:bg-slate-950 focus:ring-2 focus:ring-rose-500/10 text-gray-800 dark:text-slate-200"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    ※設定すると、Webサイト全体の `head` タグ内に `<meta name="google-site-verification" content="..." />` が自動挿入されます。
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSavingConfig}
+                    className="px-6 py-3 rounded-xl bg-gray-950 hover:bg-gray-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-950 text-white text-xs font-bold transition-all flex items-center space-x-2 shadow-md disabled:opacity-50"
+                  >
+                    {isSavingConfig ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>更新保存中...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4" />
+                        <span>Search Console 設定を保存する</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Sitemap & Robots.txt Status */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Sitemap Card */}
+              <div className="bg-white dark:bg-slate-950 border border-gray-100 dark:border-slate-900 rounded-3xl p-6 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 rounded-xl">
+                      <Globe className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">sitemap.xml (サイトマップ)</h3>
+                      <p className="text-[10px] text-emerald-600 font-bold">自動生成アクティブ</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Search Console の「サイトマップ」送信欄に入力してください。検索エンジンクローラーが全主要ページを迅速に巡回します。
+                </p>
+
+                <div className="p-3 bg-gray-50 dark:bg-slate-900 rounded-xl flex items-center justify-between border border-gray-100 dark:border-slate-800">
+                  <span className="text-[11px] font-mono text-gray-700 dark:text-slate-300 truncate mr-2">
+                    {window.location.origin}/sitemap.xml
+                  </span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/sitemap.xml`);
+                      setCopiedUrl("sitemap");
+                      setTimeout(() => setCopiedUrl(null), 2500);
+                    }}
+                    className="px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 text-gray-700 dark:text-slate-200 rounded-lg text-[10px] font-bold transition-all shrink-0 flex items-center space-x-1"
+                  >
+                    {copiedUrl === "sitemap" ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                    <span>{copiedUrl === "sitemap" ? "コピー完了" : "URLコピー"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Robots.txt Card */}
+              <div className="bg-white dark:bg-slate-950 border border-gray-100 dark:border-slate-900 rounded-3xl p-6 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 rounded-xl">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">robots.txt (クローラー制御)</h3>
+                      <p className="text-[10px] text-blue-600 font-bold">設定完了・配信中</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  検索ロボットに対し全ページの巡回を許可し、`sitemap.xml` の場所を自動通知するヘッダーを出力しています。
+                </p>
+
+                <div className="p-3 bg-gray-50 dark:bg-slate-900 rounded-xl flex items-center justify-between border border-gray-100 dark:border-slate-800">
+                  <span className="text-[11px] font-mono text-gray-700 dark:text-slate-300 truncate mr-2">
+                    {window.location.origin}/robots.txt
+                  </span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/robots.txt`);
+                      setCopiedUrl("robots");
+                      setTimeout(() => setCopiedUrl(null), 2500);
+                    }}
+                    className="px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 text-gray-700 dark:text-slate-200 rounded-lg text-[10px] font-bold transition-all shrink-0 flex items-center space-x-1"
+                  >
+                    {copiedUrl === "robots" ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                    <span>{copiedUrl === "robots" ? "コピー完了" : "URLコピー"}</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Guide Step-by-step Card */}
+            <div className="bg-slate-900 text-slate-100 rounded-3xl p-6 sm:p-8 space-y-4">
+              <h3 className="text-sm font-extrabold flex items-center space-x-2 text-rose-400">
+                <HelpCircle className="h-4.5 w-4.5" />
+                <span>Google Search Console 登録手順マニュアル</span>
+              </h3>
+              <ol className="text-xs space-y-2.5 text-slate-300 list-decimal list-inside leading-relaxed">
+                <li>
+                  <a href="https://search.google.com/search-console/" target="_blank" rel="noopener noreferrer" className="text-rose-400 underline font-bold">Google Search Console</a> にアクセスし、プロパティ（URL）を追加します。
+                </li>
+                <li>
+                  所有権の確認方法で **「HTML タグ」** を選択し、表示されたコード（例: `<meta name="google-site-verification" content="..." />`）をコピーします。
+                </li>
+                <li>
+                  本画面の **「Google サイト所有権確認メタタグ」** 入力欄に貼り付けて、「Search Console 設定を保存する」ボタンを押します。
+                </li>
+                <li>
+                  Search Console 画面に戻り **「確認」** をクリックすると、所有権の認証が即時に完了します！
+                </li>
+                <li>
+                  認証完了後、左メニューの **「サイトマップ」** から `sitemap.xml` と入力して送信してください。
+                </li>
+              </ol>
+            </div>
+
           </motion.div>
         )}
 

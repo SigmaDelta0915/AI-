@@ -85,6 +85,27 @@ export default function App() {
     return null;
   });
 
+  // Fetch SEO & Google Search Console verification meta tag
+  useEffect(() => {
+    fetch("/api/seo/config")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.gscVerificationTag) {
+          const metaTag = document.getElementById("gsc-meta-tag") as HTMLMetaElement;
+          if (metaTag) {
+            metaTag.content = data.gscVerificationTag;
+          } else {
+            const newMeta = document.createElement("meta");
+            newMeta.name = "google-site-verification";
+            newMeta.content = data.gscVerificationTag;
+            newMeta.id = "gsc-meta-tag";
+            document.head.appendChild(newMeta);
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load SEO config:", err));
+  }, []);
+
   // Sync URL Path with currentView & selectedAnimeId
   useEffect(() => {
     try {
