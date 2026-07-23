@@ -560,7 +560,7 @@ app.get("/api/anime/:id", async (req, res) => {
 
 // In-memory runtime configuration that can be updated from Admin View
 let currentAdminPasscode = process.env.ADMIN_PASSCODE || "admin2026";
-let gscVerificationTag = process.env.GSC_VERIFICATION_TAG || "googleef4377447b22e0f8";
+let gscVerificationTag = process.env.GSC_VERIFICATION_TAG || "ful9IFHhgFTEcrE1GP1J-FGz6bh4fnH66fkAsa2gLp4";
 
 // SEO & Google Search Console Endpoints
 app.get("/robots.txt", (req, res) => {
