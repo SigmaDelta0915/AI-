@@ -314,9 +314,9 @@ export default function ResultView({
 
                     {/* Quality Badge */}
                     {score && (
-                      <div className="absolute bottom-2.5 left-2.5 flex items-center space-x-1 rounded-lg bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                      <div className="absolute bottom-2.5 left-2.5 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm" title="診断ユーザー満足度">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>{score}</span>
+                        <span>満足度 {score}</span>
                       </div>
                     )}
 

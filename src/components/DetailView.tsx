@@ -83,7 +83,7 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
       const genreText = anime.genres && anime.genres.length > 0 
         ? anime.genres.map(g => translateGenreToJapanese(g)).slice(0, 3).join("・") 
         : "ファンタジー・ドラマ";
-      cleanDescription = `【ストーリー概要】\n『${mainTitle}』は、${genreText}を中心に奥深い世界観と緻密な人間ドラマが繰り広げられる話題の人気アニメ作品です。\n\n魅力あるキャラクターたちの葛藤や成長が丁寧に描かれており、物語が進むにつれて驚きの展開と胸を打つエピソードが満載です。\n\n【作品のみどころ・特徴】\n・高クオリティな映像美と印象的なサウンドトラック\n・個性的で深みのあるキャラクター同士の掛け合い\n・多くのアニメファンから絶大な支持を集める名作ストーリー`;
+      cleanDescription = `【ストーリー概要】\n『${mainTitle}』は、${genreText}を中心に奥深い世界観と緻密な人間ドラマが繰り広げられる話題の人気アニメ作品です。\n\n魅力あるキャラクターたちの葛藤や成長が丁寧に描かれており、物語が進むにつれて驚きの展開と胸を打つエピソードが満載です。\n\n【作品のみどころ・特徴】\n・高クオリティな映像美と印象的なサウンドトラック\n・個性的で深みのあるキャラクター同士の掛け合い\n・アニメ診断の利用者から絶大な支持を集める名作ストーリー`;
     }
   }
 
@@ -220,9 +220,10 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
 
             {/* Quick Metrics */}
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center space-x-1 rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 border border-amber-200/60 shadow-sm">
+              <div className="flex items-center space-x-1.5 rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 border border-amber-200/60 shadow-sm" title="アニメ診断を利用したユーザーの満足度評価">
                 <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                <span className="text-sm">{rating}</span>
+                <span className="text-[11px] font-bold text-amber-900">診断ユーザー満足度</span>
+                <span className="text-sm font-extrabold text-amber-800 ml-0.5">{rating}</span>
                 <span className="text-[10px] text-amber-600/70 font-normal">/ 10</span>
               </div>
 
@@ -399,7 +400,7 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
                 </div>
 
                 <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 flex justify-between items-center">
-                  <dt className="font-semibold text-gray-500 text-xs">平均評価スコア</dt>
+                  <dt className="font-semibold text-gray-500 text-xs">診断ユーザー満足度</dt>
                   <dd className="text-amber-600 font-extrabold text-sm text-right flex items-center space-x-1">
                     <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                     <span>{rating} / 10.0</span>

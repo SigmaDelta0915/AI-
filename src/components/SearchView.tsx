@@ -163,7 +163,7 @@ export default function SearchView({
               id="sort-select-field"
             >
               <option value="popularity">人気順（定番）</option>
-              <option value="score">評価スコア順</option>
+              <option value="score">診断満足度順</option>
               <option value="newest">新着・放送年順</option>
             </select>
           </div>
@@ -255,9 +255,9 @@ export default function SearchView({
 
                   {/* Quality Score Badge */}
                   {score && (
-                    <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                    <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm" title="診断ユーザー満足度">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span>{score}</span>
+                      <span>満足度 {score}</span>
                     </div>
                   )}
                 </div>

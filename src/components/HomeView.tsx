@@ -228,7 +228,7 @@ export default function HomeView({
               <TrendingUp className="h-6 w-6 text-rose-500" />
               <span>今、人気の話題作</span>
             </h2>
-            <p className="text-sm text-gray-400">診断によく登場する、ユーザーから高評価を得ている最新トレンドアニメ。</p>
+            <p className="text-sm text-gray-400">アニメ診断の利用者が選んだ、満足度の高い注目アニメ作品。</p>
           </div>
           <button
             onClick={() => {
@@ -295,9 +295,9 @@ export default function HomeView({
 
                     {/* Quality Badge */}
                     {score && (
-                      <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                      <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm" title="診断ユーザー満足度">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>{score}</span>
+                        <span>満足度 {score}</span>
                       </div>
                     )}
                   </div>
