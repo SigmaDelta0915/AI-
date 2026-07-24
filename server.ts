@@ -464,6 +464,12 @@ async function getJapaneseDescription(animeId: number, title: string, englishDes
 
   // Try Gemini translation if key is present
   if (process.env.GEMINI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
+      const fallbackSummary = `『${title}』の公式アニメ作品情報です。緻密な世界観と魅力的なキャラクター展開が評価されています。`;
+      translationCache[animeId] = fallbackSummary;
+      return fallbackSummary;
+    }
+
     try {
       const ai = getAi();
       const prompt = `
@@ -492,7 +498,7 @@ ${englishDescription}
         return translated;
       }
     } catch (error: any) {
-      console.warn(`Translation fallback used for anime ID ${animeId}: ${error?.message || error}`);
+      console.log(`[Translation] Applied fallback summary for anime ID ${animeId}`);
     }
   }
 
@@ -715,10 +721,15 @@ app.post("/api/admin/test-diagnose", async (req, res) => {
     .replace("{{ANSWERS_SUMMARY}}", answersSummary)
     .replace("{{SCORES_SUMMARY}}", scoresSummary);
 
+  if (!process.env.GEMINI_API_KEY) {
+    console.log("[Test Diagnosis] Using rule-based diagnosis engine.");
+    return res.json(generateServerFallbackDiagnosis(testCategoryScores || {}));
+  }
+
   try {
     const ai = getAi();
     const geminiResponse = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: "gemini-2.5-flash",
       contents: promptText,
       config: {
         responseMimeType: "application/json",
@@ -749,7 +760,7 @@ app.post("/api/admin/test-diagnose", async (req, res) => {
     if (!aiText) throw new Error("Gemini returned empty response.");
     res.json(JSON.parse(aiText));
   } catch (error: any) {
-    console.warn("Test diagnose Gemini call skipped or failed, using rule-based fallback:", error?.message || error);
+    console.log("[Test Diagnosis] Applied rule-based fallback engine.");
     res.json(generateServerFallbackDiagnosis(testCategoryScores || {}));
   }
 });
@@ -997,61 +1008,66 @@ app.post("/api/diagnose", async (req, res) => {
 
   let parsedResult: { typeName: string; typeDescription: string; keyTraits: string[]; recommendations: Array<{ title: string; reason: string }> };
 
-  try {
-    const ai = getAi();
-    const geminiResponse = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: promptText,
-      config: {
-        temperature: 0.85,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            typeName: {
-              type: "STRING",
-              description: "ユーザーの診断タイプ名（例：『神秘的な知略家タイプ』『熱血少年マンガヒーロータイプ』『心温まる日常ヒーリングタイプ』等、魅力的な二つ名）",
-            },
-            typeDescription: {
-              type: "STRING",
-              description: "ユーザーのアニメ性格・価値観の詳細な分析。なぜこのタイプなのか、どのような展開やテーマに心が惹かれやすいのかを深く解説した段落（300文字程度）。",
-            },
-            keyTraits: {
-              type: "ARRAY",
-              items: { type: "STRING" },
-              description: "ユーザーの好みを表す短いハッシュタグや特徴（例：['伏線回収好き', 'ダークファンタジー', '圧倒的作画', 'ほのぼの日常']）。4個〜6個程度。",
-            },
-            recommendations: {
-              type: "ARRAY",
-              items: {
-                type: "OBJECT",
-                properties: {
-                  title: {
-                    type: "STRING",
-                    description: "推奨するアニメのタイトル（日本語での一般的な名称。例：『葬送のフリーレン』『ハイキュー!!』『シュタインズ・ゲート』等）",
-                  },
-                  reason: {
-                    type: "STRING",
-                    description: "このアニメがこのユーザーに深く刺さる理由。ユーザーの休日スタイルや、主人公の好み、求めるテンポ等に具体的に触れたオリジナル文章（150〜200文字）。",
-                  },
-                },
-                required: ["title", "reason"],
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const ai = getAi();
+      const geminiResponse = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: promptText,
+        config: {
+          temperature: 0.85,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              typeName: {
+                type: "STRING",
+                description: "ユーザーの診断タイプ名（例：『神秘的な知略家タイプ』『熱血少年マンガヒーロータイプ』『心温まる日常ヒーリングタイプ』等、魅力的な二つ名）",
               },
-              description: "お勧めするアニメ作品（5本〜7本を推奨）",
+              typeDescription: {
+                type: "STRING",
+                description: "ユーザーのアニメ性格・価値観の詳細な分析。なぜこのタイプなのか、どのような展開やテーマに心が惹かれやすいのかを深く解説した段落（300文字程度）。",
+              },
+              keyTraits: {
+                type: "ARRAY",
+                items: { type: "STRING" },
+                description: "ユーザーの好みを表す短いハッシュタグや特徴（例：['伏線回収好き', 'ダークファンタジー', '圧倒的作画', 'ほのぼの日常']）。4個〜6個程度。",
+              },
+              recommendations: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    title: {
+                      type: "STRING",
+                      description: "推奨するアニメのタイトル（日本語での一般的な名称。例：『葬送のフリーレン』『ハイキュー!!』『シュタインズ・ゲート』等）",
+                    },
+                    reason: {
+                      type: "STRING",
+                      description: "このアニメがこのユーザーに深く刺さる理由。ユーザーの休日スタイルや、主人公の好み、求めるテンポ等に具体的に触れたオリジナル文章（150〜200文字）。",
+                    },
+                  },
+                  required: ["title", "reason"],
+                },
+                description: "お勧めするアニメ作品（5本〜7本を推奨）",
+              },
             },
+            required: ["typeName", "typeDescription", "keyTraits", "recommendations"],
           },
-          required: ["typeName", "typeDescription", "keyTraits", "recommendations"],
         },
-      },
-    });
+      });
 
-    const aiText = geminiResponse.text;
-    if (!aiText) {
-      throw new Error("Gemini AI generated an empty response.");
+      const aiText = geminiResponse.text;
+      if (!aiText) {
+        throw new Error("Gemini AI generated an empty response.");
+      }
+      parsedResult = JSON.parse(aiText);
+    } catch (error: any) {
+      console.log("[Diagnosis Engine] Active rule-based diagnosis engine applied.");
+      parsedResult = generateServerFallbackDiagnosis(categoryScores || {}, lang as "ja" | "en");
     }
-    parsedResult = JSON.parse(aiText);
-  } catch (error: any) {
-    console.warn("Gemini API call skipped or failed, using smart rule-based diagnosis engine:", error?.message || error);
+  } else {
+    console.log("[Diagnosis Engine] Using smart rule-based diagnosis engine.");
     parsedResult = generateServerFallbackDiagnosis(categoryScores || {}, lang as "ja" | "en");
   }
 

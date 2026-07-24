@@ -100,11 +100,10 @@ export default function HomeView({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl"
+            className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl"
           >
-            {ui.home.heroTitle}
-            <span className="block mt-2 bg-gradient-to-r from-rose-500 via-pink-500 to-violet-600 bg-clip-text text-transparent">
-              {ui.home.heroSubtitle}
+            <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-violet-600 bg-clip-text text-transparent">
+              {ui.home.heroTitle}
             </span>
           </motion.h1>
 

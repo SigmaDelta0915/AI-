@@ -22,7 +22,7 @@ export default function Footer({ setView }: FooterProps) {
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <span className="text-gray-900 font-bold tracking-tight text-base">
-                {ui.nav.brand} <span className="text-rose-500 text-xs">Anime Diagnose</span>
+                {ui.appName} <span className="text-rose-500 text-xs">Diagnose</span>
               </span>
             </div>
             <p className="text-sm text-gray-500 max-w-md leading-relaxed">
@@ -79,7 +79,16 @@ export default function Footer({ setView }: FooterProps) {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-gray-200/60 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400">
+        {/* Disclaimer Box */}
+        <div className="mt-8 rounded-2xl border border-gray-200/80 bg-white p-4 text-xs text-gray-500 shadow-xs">
+          <div className="flex items-center space-x-2 font-bold text-gray-700 mb-1">
+            <ShieldAlert className="h-4 w-4 text-rose-500" />
+            <span>{lang === "ja" ? "免責事項・利用上の注意" : "Disclaimer & Terms"}</span>
+          </div>
+          <p className="leading-relaxed text-gray-500">{ui.footer.disclaimer}</p>
+        </div>
+
+        <div className="mt-8 border-t border-gray-200/60 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400">
           <p className="flex items-center">
             <span>© {currentYear} Anime Diagnose. All rights reserved.</span>
           </p>
