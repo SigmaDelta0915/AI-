@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Sparkles, ArrowLeft, ArrowRight, Loader, Cpu, ShieldAlert, BadgeInfo } from "lucide-react";
-import { DiagnosisQuestion, DiagnosisResult } from "../types";
+import { DiagnosisResult } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { runDiagnosis } from "../services/animeService";
+import { useLanguage } from "../context/LanguageContext";
 
 interface DiagnoseViewProps {
   setView: (view: string) => void;
@@ -10,175 +11,9 @@ interface DiagnoseViewProps {
   saveDiagnosisToHistory: (result: DiagnosisResult, answers: { [key: number]: string }) => void;
 }
 
-const QUESTIONS: DiagnosisQuestion[] = [
-  {
-    id: 1,
-    question: "休日の理想的な過ごし方は？",
-    options: [
-      { id: "A", text: "部屋で好きなだけゴロゴロしながらだらだら過ごす", scores: { sliceOfLife: 3, comedy: 2 } },
-      { id: "B", text: "カフェ巡りをしたり、お洒落な街へショッピングに出かける", scores: { romance: 3, drama: 2 } },
-      { id: "C", text: "時間を忘れてガッツリとゲームをプレイし続ける", scores: { isekai: 3, sciFi: 2 } },
-      { id: "D", text: "映画館で最新作を見たり、静かな美術館を散策する", scores: { mystery: 3, drama: 2 } },
-      { id: "E", text: "部屋を真っ暗にして重厚で鬱々とした濃密なアニメ世界に一人で没入する", scores: { depressive: 3, sciFi: 1 } },
-    ],
-  },
-  {
-    id: 2,
-    question: "あなたがアニメに最も求めている「感覚」は？",
-    options: [
-      { id: "A", text: "鳥肌が立つような、ゾクゾクするアクションや熱い闘志", scores: { action: 3, sports: 2 } },
-      { id: "B", text: "涙腺が崩壊するような、胸が締め付けられる深い感動", scores: { tear: 3, drama: 2 } },
-      { id: "C", text: "張り巡らされた伏線や、謎が解き明かされる知の快感", scores: { mystery: 3, sciFi: 2 } },
-      { id: "D", text: "クスッと笑えて肩の力が抜ける、日々の癒やしとリラックス", scores: { sliceOfLife: 3, comedy: 2 } },
-      { id: "E", text: "心がヒリヒリと沈み込むような、鬱展開・狂気・絶望感の揺さぶり", scores: { depressive: 3, drama: 2 } },
-    ],
-  },
-  {
-    id: 3,
-    question: "もしファンタジーの世界に生まれ変わるなら、どの職業が良い？",
-    options: [
-      { id: "A", text: "最前線で魔王に立ち向かう、伝説の熱きロマン剣士", scores: { action: 3, sports: 1 } },
-      { id: "B", text: "森羅万象の真理を極める、冷静沈着な大賢者", scores: { isekai: 2, sciFi: 3 } },
-      { id: "C", text: "王宮の難事件を影から解決する、頭脳派の宮廷探偵", scores: { mystery: 3 } },
-      { id: "D", text: "宿場町で美味しい料理を振る舞う、のんびり食堂のオーナー", scores: { sliceOfLife: 3, comedy: 1 } },
-      { id: "E", text: "世界の残酷な理（ことわり）や理不尽な死に翻弄される孤独な観測者", scores: { depressive: 3, mystery: 1 } },
-    ],
-  },
-  {
-    id: 4,
-    question: "惹かれる主人公はどんなタイプ？",
-    options: [
-      { id: "A", text: "不器用でも熱いハートを持ち、仲間と共に成長する努力家", scores: { sports: 3, action: 2 } },
-      { id: "B", text: "常に沈着冷静、誰とも群れずに最善手を選ぶ一匹狼", scores: { mystery: 2, sciFi: 3 } },
-      { id: "C", text: "凡人だけど優しさに溢れ、誰かのためにボロボロになれる人", scores: { tear: 3, romance: 2 } },
-      { id: "D", text: "一見すると冴えないが、実は規格外の最強パワーを隠す実力者", scores: { isekai: 3, action: 2 } },
-      { id: "E", text: "絶望的な運命や理不尽な鬱展開の中で、葛藤し狂いそうになりながら耐える主人公", scores: { depressive: 3, tear: 1 } },
-    ],
-  },
-  {
-    id: 5,
-    question: "物語に最も求める「ストーリー展開のテンポ」は？",
-    options: [
-      { id: "A", text: "無駄な引き延ばしを削ぎ落とした、スピーディでスリリングな展開", scores: { action: 3, sciFi: 1 } },
-      { id: "B", text: "登場人物の揺れ動く感情を、丁寧に丁寧に重ねて描く人間ドラマ", scores: { tear: 3, drama: 2 } },
-      { id: "C", text: "特に重い出来事は起きず、のんびりとした時間が流れる空気感", scores: { sliceOfLife: 3 } },
-      { id: "D", text: "何気ない会話がすべて後々の伏線になっているような緻密な構成", scores: { mystery: 3, sciFi: 2 } },
-      { id: "E", text: "平和に見えていた日常が徐々に狂いだし、一気に鬱展開へと転落していく怒濤のサスペンス", scores: { depressive: 3, mystery: 2 } },
-    ],
-  },
-  {
-    id: 6,
-    question: "好きな「恋愛要素」の描き方は？",
-    options: [
-      { id: "A", text: "見ていて恥ずかしくなるほど、お顔が赤くなる甘酸っぱい純愛", scores: { romance: 3 } },
-      { id: "B", text: "すれ違いや試練を乗り越える、運命的で少し切ないラブストーリー", scores: { tear: 2, romance: 3 } },
-      { id: "C", text: "つかず離れずの関係に、ついヤキモキしてしまうドタバタコメディ", scores: { comedy: 2, romance: 2 } },
-      { id: "D", text: "恋愛要素は無し、またはストーリーを邪魔しない程度の隠し味で十分", scores: { action: 2, mystery: 2 } },
-      { id: "E", text: "愛ゆえの狂気や執着、死別や生々しい愛憎が渦巻くダークで重い人間模様", scores: { depressive: 3, drama: 2 } },
-    ],
-  },
-  {
-    id: 7,
-    question: "アニメを見る際、どのような「ビジュアル（作画）」に惹かれる？",
-    options: [
-      { id: "A", text: "激しい動きやハイクオリティなカメラワークが炸裂するバトル描写", scores: { action: 3 } },
-      { id: "B", text: "背景美術や光の差し込みが、まるで実写映画のように美しい描写", scores: { tear: 2, drama: 2 } },
-      { id: "C", text: "丸みがあって柔らかく、見ているだけで安心するようなタッチ", scores: { sliceOfLife: 3 } },
-      { id: "D", text: "どこか退廃的でダーク、影が多めのシリアスで引き締まったタッチ", scores: { mystery: 2, sciFi: 3 } },
-      { id: "E", text: "歪んだ空間美や精神世界、薄暗く鬱々とした陰惨で独特な世界観タッチ", scores: { depressive: 3, mystery: 1 } },
-    ],
-  },
-  {
-    id: 8,
-    question: "あなたが最も納得できる「物語の結末（エンディング）」は？",
-    options: [
-      { id: "A", text: "すべての敵を倒し、全員が笑顔で救われる王道のハッピーエンド", scores: { action: 2, sports: 2 } },
-      { id: "B", text: "切なくも温かい余韻が残り、思わず深くため息をついてしまう結末", scores: { tear: 3, drama: 2 } },
-      { id: "C", text: "度肝を抜かれる大どんでん返し。最後まで予測がつかない結末", scores: { mystery: 3, sciFi: 2 } },
-      { id: "D", text: "特別な劇的変化はなく、これからも穏やかな毎日が続いていく結末", scores: { sliceOfLife: 3 } },
-      { id: "E", text: "心に大きな傷や重い課題を遺すような、救いのない完全ビター/鬱エンド", scores: { depressive: 3, drama: 1 } },
-    ],
-  },
-  {
-    id: 9,
-    question: "アニメの「世界観・舞台」で最も興味を惹かれるのは？",
-    options: [
-      { id: "A", text: "異形の怪物や魔法、ギルドなどが存在する壮大なファンタジー", scores: { isekai: 3, action: 2 } },
-      { id: "B", text: "アンドロイド、電脳世界、未来の宇宙船などが登場するSF世界", scores: { sciFi: 3 } },
-      { id: "C", text: "私たちが暮らす現代の、どこにでもある学校やのどかな田舎町", scores: { sliceOfLife: 2, romance: 2 } },
-      { id: "D", text: "史実をベースにしていたり、重厚な軍事・政治劇が繰り広げられる世界", scores: { drama: 3, mystery: 1 } },
-      { id: "E", text: "死と隣り合わせのディストピアや、人間の尊厳が踏みにじられる鬱々とした世界", scores: { depressive: 3, sciFi: 2 } },
-    ],
-  },
-  {
-    id: 10,
-    question: "キャラクター同士の関係性で、最も「エモい」と感じるのは？",
-    options: [
-      { id: "A", text: "背中を預け合い、固い絆で生死を共にする最強のライバル・バディ", scores: { action: 2, sports: 3 } },
-      { id: "B", text: "すれ違いや立場の違いで戦わねばならない、哀しき宿命のライバル", scores: { tear: 3, drama: 2 } },
-      { id: "C", text: "部室やシェアハウスでみんなが楽しくくだらない話を交わす居場所", scores: { sliceOfLife: 3, comedy: 2 } },
-      { id: "D", text: "言葉にしなくても行動で分かり合う、一見冷たいが絶対的な信頼", scores: { mystery: 2, sciFi: 2 } },
-      { id: "E", text: "共倒れや依存、共依存や狂気に満ちた背徳感のあるダークな人間関係", scores: { depressive: 3, drama: 1 } },
-    ],
-  },
-  {
-    id: 11,
-    question: "「謎解きやサスペンス、マインドゲーム」は好き？",
-    options: [
-      { id: "A", text: "大好物。散りばめられた伏線を頭の中で整理しながら推理したい", scores: { mystery: 3 } },
-      { id: "B", text: "程よい謎解きやスパイスとしてシリアスなサスペンスがあるのは好き", scores: { sciFi: 2, mystery: 1 } },
-      { id: "C", text: "頭を使うより、ストレートで純粋に熱くなれる展開の方が好き", scores: { action: 2, isekai: 2 } },
-      { id: "D", text: "争い事や謎は不要。終始ピースフルで平和であってほしい", scores: { sliceOfLife: 3 } },
-      { id: "E", text: "精神的に追い詰められる心理戦や、狂気が迫り来る心理ホラーサスペンスが好き", scores: { depressive: 3, mystery: 2 } },
-    ],
-  },
-  {
-    id: 12,
-    question: "物語の中で、主人公が乗り越えるべき「壁や試練」はどのようなものが良い？",
-    options: [
-      { id: "A", text: "世界や人類の平和を脅かす、絶対的な強さを持った巨悪やモンスター", scores: { action: 3, isekai: 2 } },
-      { id: "B", text: "大切な仲間の喪失や、自分自身の弱さと向き合うといった内面の苦悩", scores: { tear: 3, drama: 2 } },
-      { id: "C", text: "同じ夢を追うライバルと、お互いのプライドを懸けた極限の勝負", scores: { sports: 3 } },
-      { id: "D", text: "ちょっとした勘違いや試験勉強、日常のごく些細なすれ違いトラブル", scores: { sliceOfLife: 2, comedy: 2 } },
-      { id: "E", text: "いくら抗っても逃れられない理不尽な死や惨劇、希望が打ち砕かれる残酷な鬱状況", scores: { depressive: 3, drama: 2 } },
-    ],
-  },
-  {
-    id: 13,
-    question: "あなたにとってアニメの「音楽（主題歌やBGM）」はどのくらい大事？",
-    options: [
-      { id: "A", text: "超重要。聴くだけでテンションがMAXになる激しいアニソンやロック", scores: { action: 2, sports: 2 } },
-      { id: "B", text: "超重要。涙腺を極限まで刺激する、哀愁を帯びたストリングスや名曲", scores: { tear: 3, drama: 1 } },
-      { id: "C", text: "重要。シーンに寄り添う、穏やかで心地よいLo-Fiやアコースティック", scores: { sliceOfLife: 3 } },
-      { id: "D", text: "重要。不穏さや退廃的な近未来感を完璧に演出するインダストリアル調", scores: { mystery: 1, sciFi: 3 } },
-      { id: "E", text: "重要。不安や不気味さ、狂気と美しさが同居する独創的な劇伴・ダークソング", scores: { depressive: 3, mystery: 1 } },
-    ],
-  },
-  {
-    id: 14,
-    question: "アニメを鑑賞する時に最も多い「シチュエーション」は？",
-    options: [
-      { id: "A", text: "深夜、誰にも邪魔されない時間に部屋を暗くして画面に完全没頭", scores: { mystery: 2, sciFi: 2 } },
-      { id: "B", text: "週末の午前中や晴れた午後、温かい飲み物を片手にリフレッシュ鑑賞", scores: { sliceOfLife: 3, romance: 2 } },
-      { id: "C", text: "ご飯を食べながら、または作業用として適度なテンションでサクッと視聴", scores: { comedy: 2, isekai: 2 } },
-      { id: "D", text: "とにかく泣きたい、熱くなりたいなど『感情を揺さぶられたい』時に一気見", scores: { tear: 3, drama: 2 } },
-      { id: "E", text: "気分が鬱々としている時・沈んでいる時、共鳴できるダークな世界に深く浸りたい時", scores: { depressive: 3, drama: 1 } },
-    ],
-  },
-  {
-    id: 15,
-    question: "あなたが好むアニメの全体的な「年齢層・雰囲気」は？",
-    options: [
-      { id: "A", text: "爽やかで希望に満ちており、誰もが真っ直ぐに楽しめる雰囲気", scores: { sports: 2, action: 2 } },
-      { id: "B", text: "哲学的で、現実の厳しさや人間の二面性などを描く大人向けの重厚な雰囲気", scores: { mystery: 2, sciFi: 3 } },
-      { id: "C", text: "とにかくエモーショナル。登場人物の生きた証に深く感動できる雰囲気", scores: { tear: 3, drama: 2 } },
-      { id: "D", text: "キャラクターたちが可愛らしく穏やかで、一切ストレスのない雰囲気", scores: { sliceOfLife: 3, comedy: 1 } },
-      { id: "E", text: "鬱展開やトラウマ描写、人間の闇や不都合な真実を直視する衝撃的な雰囲気", scores: { depressive: 3, drama: 2 } },
-    ],
-  },
-];
-
 export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosisToHistory }: DiagnoseViewProps) {
+  const { lang, questions, ui } = useLanguage();
+
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [categoryScores, setCategoryScores] = useState<{ [key: string]: number }>({
@@ -200,17 +35,17 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
   const [diagnoseStep, setDiagnoseStep] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const currentQuestion = QUESTIONS[currentIdx];
-  const progressPercent = Math.round(((currentIdx + 1) / QUESTIONS.length) * 100);
+  const currentQuestion = questions[currentIdx];
+  const progressPercent = Math.round(((currentIdx + 1) / questions.length) * 100);
 
-  const handleOptionSelect = (optionId: string, scores: { [key: string]: number }) => {
+  const handleOptionSelect = (optionId: string, scores: { [key: string]: number }, optionText: string) => {
     if (isTransitioning || diagnosing) return;
     if (!currentQuestion) return;
 
     setIsTransitioning(true);
 
     // Record answer
-    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionId }));
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionText }));
 
     // Accumulate scores
     setCategoryScores((prev) => {
@@ -222,10 +57,10 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
     });
 
     // Proceed to next or analyze
-    if (currentIdx < QUESTIONS.length - 1) {
+    if (currentIdx < questions.length - 1) {
       setTimeout(() => {
         setCurrentIdx((prev) => {
-          if (prev < QUESTIONS.length - 1) {
+          if (prev < questions.length - 1) {
             return prev + 1;
           }
           return prev;
@@ -250,7 +85,7 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
     setDiagnosing(true);
     setErrorMsg("");
 
-    // Simulate multi-phase high quality load text
+    // Simulate multi-phase load text
     const interval = setInterval(() => {
       setDiagnoseStep((prev) => {
         if (prev < 3) return prev + 1;
@@ -259,11 +94,11 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
     }, 1800);
 
     try {
-      const result = await runDiagnosis(answers, categoryScores);
+      const result = await runDiagnosis(answers, categoryScores, lang);
       clearInterval(interval);
 
       if (!result || !result.typeName) {
-        throw new Error("診断結果の生成に失敗しました。もう一度お試しください。");
+        throw new Error(lang === "ja" ? "診断結果の生成に失敗しました。もう一度お試しください。" : "Failed to generate result. Please try again.");
       }
 
       setDiagnosisResult(result);
@@ -272,17 +107,22 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
     } catch (error: any) {
       clearInterval(interval);
       console.error("Diagnosis error:", error);
-      setErrorMsg(error?.message || "AI診断処理中にエラーが発生しました。もう一度お試しください。");
+      setErrorMsg(error?.message || (lang === "ja" ? "AI診断処理中にエラーが発生しました。もう一度お試しください。" : "An error occurred during AI diagnosis. Please try again."));
       setDiagnosing(false);
     }
   };
 
   // Loading Screen Phases
-  const loadingSteps = [
+  const loadingSteps = lang === "ja" ? [
     { text: "回答された深層性格パラメーターを抽出中...", desc: "あなたの休日の行動パターン、理想像を10個の指標に数値化しています。" },
     { text: "Gemini AI が好みのアニメパターンをマッチング中...", desc: "あなたにぴったりのテーマ・テンポ・世界観を持つアニメ群を解析中。" },
     { text: "パーソナル推薦理由＆性格コメントを編纂中...", desc: "AIがあなたの回答に基づいてオリジナルの推薦文章を作成しています。" },
     { text: "AniList API から作品データベースを同期中...", desc: "おすすめのアニメメタデータ（放送年・スコア・PV情報など）を収集しています。" },
+  ] : [
+    { text: "Extracting your deep personality parameters...", desc: "Converting your choices and ideal scenarios into 10 metric indicators." },
+    { text: "Gemini AI is matching anime patterns...", desc: "Analyzing titles with the perfect theme, pacing, and worldview for you." },
+    { text: "Compiling personalized rationale & personality profile...", desc: "AI is creating custom recommendation text based on your answers." },
+    { text: "Synchronizing anime database with AniList API...", desc: "Fetching latest metadata (air dates, scores, trailer information)." },
   ];
 
   if (diagnosing) {
@@ -298,149 +138,144 @@ export default function DiagnoseView({ setView, setDiagnosisResult, saveDiagnosi
             <span className="absolute inset-0 rounded-2xl bg-rose-400/25 animate-ping"></span>
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 transition-all duration-500">
-            {loadingSteps[diagnoseStep].text}
-          </h3>
-          <p className="mt-2 text-sm text-gray-400">
-            {loadingSteps[diagnoseStep].desc}
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            {ui.diagnose.analyzingTitle}
+          </h2>
+          <p className="text-sm text-gray-500 mb-8">
+            {ui.diagnose.analyzingSub}
           </p>
 
-          <div className="mt-8 space-y-2">
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: "0%" }}
-                animate={{ width: `${(diagnoseStep + 1) * 25}%` }}
-                transition={{ duration: 1.5 }}
-                className="h-full bg-gradient-to-r from-rose-500 to-violet-500"
-              ></motion.div>
-            </div>
-            <div className="flex justify-between text-xs font-mono text-gray-400">
-              <span>ANIME DIAGNOSTIC ENGINE v2.5</span>
-              <span>{(diagnoseStep + 1) * 25}%</span>
-            </div>
+          <div className="space-y-4 mb-8 text-left bg-gray-50/80 p-5 rounded-2xl border border-gray-100">
+            {loadingSteps.map((step, idx) => (
+              <div key={idx} className="flex items-start space-x-3">
+                <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  idx <= diagnoseStep ? "bg-rose-500 text-white" : "bg-gray-200 text-gray-400"
+                }`}>
+                  {idx <= diagnoseStep ? "✓" : idx + 1}
+                </div>
+                <div>
+                  <p className={`text-xs font-semibold ${idx === diagnoseStep ? "text-rose-600 animate-pulse" : "text-gray-700"}`}>
+                    {step.text}
+                  </p>
+                  <p className="text-[11px] text-gray-400 leading-tight mt-0.5">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-500 rounded-full"
+              style={{ width: `${Math.min(100, (diagnoseStep + 1) * 25)}%` }}
+            ></div>
           </div>
         </motion.div>
-      </div>
-    );
-  }
-
-  if (!currentQuestion) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-24 text-center space-y-4">
-        <div className="mx-auto h-12 w-12 rounded-full border-4 border-rose-500 border-t-transparent animate-spin"></div>
-        <p className="text-sm text-gray-400 font-medium">ロード中...</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 font-sans">
-      
-      {/* Upper Status Panel */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={handlePrev}
-          disabled={currentIdx === 0}
-          className="flex items-center space-x-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 disabled:opacity-30 disabled:pointer-events-none transition-colors"
-          id="diagnose-back-btn"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>前に戻る</span>
-        </button>
-
-        <span className="text-xs font-bold text-rose-500 font-mono tracking-wider bg-rose-50 px-3 py-1 rounded-full">
-          QUESTION {currentIdx + 1} / {QUESTIONS.length}
-        </span>
-      </div>
-
-      {/* Sleek Progress Indicator */}
-      <div className="mb-10 space-y-1.5">
-        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-          <div
-            style={{ width: `${progressPercent}%` }}
-            className="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-violet-500 transition-all duration-300 rounded-full"
-          ></div>
+    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12 font-sans">
+      {/* Header Progress */}
+      <div className="mb-8 text-center">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold mb-3 border border-rose-100">
+          <Sparkles className="h-3.5 w-3.5" />
+          <span>{ui.diagnose.title}</span>
         </div>
-        <div className="flex justify-between text-[11px] text-gray-400">
-          <span>診断開始</span>
-          <span>完了 & AI解析</span>
+        
+        {/* Progress Bar */}
+        <div className="flex items-center justify-between text-xs text-gray-500 font-medium mb-2 px-1">
+          <span>{lang === "ja" ? `質問 ${currentIdx + 1} / ${questions.length}` : `Question ${currentIdx + 1} of ${questions.length}`}</span>
+          <span className="text-rose-600 font-bold">{progressPercent}%</span>
+        </div>
+        <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden p-0.5 border border-gray-200/60">
+          <motion.div
+            className="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 rounded-full"
+            initial={{ width: "0%" }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.3 }}
+          ></motion.div>
         </div>
       </div>
 
-      {/* Error Boundary Notice */}
       {errorMsg && (
-        <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600 flex items-start space-x-2.5">
-          <ShieldAlert className="h-5 w-5 shrink-0 text-red-500 mt-0.5" />
-          <div className="space-y-1">
-            <p className="font-bold">診断エラー</p>
-            <p>{errorMsg}</p>
-            <button
-              onClick={triggerAIDiagnosis}
-              className="mt-2 inline-flex items-center px-3 py-1.5 rounded-lg bg-red-600 text-white font-semibold text-xs hover:bg-red-700 transition-colors"
-            >
-              再試行する
-            </button>
-          </div>
+        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center space-x-2">
+          <ShieldAlert className="h-5 w-5 shrink-0 text-rose-500" />
+          <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* Main Question Card with AnimatePresence */}
+      {/* Main Question Card */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentQuestion.id}
+          key={currentIdx}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.25 }}
-          className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-10 shadow-xl backdrop-blur-xl space-y-8"
+          transition={{ duration: 0.2 }}
+          className="rounded-3xl border border-gray-100 bg-white p-6 sm:p-10 shadow-xl shadow-gray-100/50"
         >
-          <div>
-            <span className="text-3xl font-extrabold text-transparent bg-gradient-to-r from-rose-500 to-violet-500 bg-clip-text font-mono">
-              Q{currentQuestion.id}.
+          {/* Question Text */}
+          <div className="mb-8">
+            <span className="text-xs font-bold tracking-wider text-rose-500 uppercase block mb-1">
+              Q{currentQuestion.id}
             </span>
-            <h2 className="mt-2 text-xl font-extrabold text-gray-900 sm:text-2xl tracking-tight leading-snug">
-              {currentQuestion.question}
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+              {currentQuestion.question[lang]}
             </h2>
           </div>
 
-          <div className="space-y-3">
+          {/* Options */}
+          <div className="space-y-3 sm:space-y-4">
             {currentQuestion.options.map((option) => {
-              const isSelected = answers[currentQuestion.id] === option.id;
+              const isSelected = answers[currentQuestion.id] === option.text[lang];
 
               return (
                 <button
                   key={option.id}
-                  onClick={() => handleOptionSelect(option.id, option.scores)}
-                  className={`w-full rounded-2xl border p-5 text-left transition-all duration-200 outline-none flex items-center justify-between ${
+                  onClick={() => handleOptionSelect(option.id, option.scores, option.text[lang])}
+                  disabled={isTransitioning}
+                  className={`group relative flex w-full items-center justify-between rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 border ${
                     isSelected
-                      ? "border-rose-500 bg-rose-50/40 text-rose-900 shadow-md ring-1 ring-rose-500"
-                      : "border-gray-200/80 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300"
+                      ? "border-rose-500 bg-rose-50/60 ring-2 ring-rose-500/20 shadow-md"
+                      : "border-gray-150 bg-gray-50/50 hover:border-rose-300 hover:bg-rose-50/20 text-gray-800"
                   }`}
-                  id={`option-${currentQuestion.id}-${option.id}`}
                 >
-                  <span className="text-sm font-semibold sm:text-base leading-relaxed">
-                    {option.text}
-                  </span>
-                  
-                  {/* Circle check/id indicator */}
-                  <span className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 ml-4 font-bold text-xs font-mono transition-colors ${
-                    isSelected 
-                      ? "bg-rose-500 text-white" 
-                      : "bg-gray-100 text-gray-400 group-hover:bg-gray-200"
-                  }`}>
-                    {option.id}
-                  </span>
+                  <div className="flex items-center space-x-3.5 pr-4">
+                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl font-bold text-xs transition-colors ${
+                      isSelected ? "bg-rose-500 text-white" : "bg-white text-gray-500 border border-gray-200 group-hover:border-rose-300 group-hover:text-rose-600"
+                    }`}>
+                      {option.id}
+                    </span>
+                    <span className="text-sm sm:text-base font-medium leading-relaxed">
+                      {option.text[lang]}
+                    </span>
+                  </div>
+                  <ArrowRight className={`h-4 w-4 shrink-0 transition-transform ${isSelected ? "text-rose-500 translate-x-1" : "text-gray-300 group-hover:text-rose-400 group-hover:translate-x-1"}`} />
                 </button>
               );
             })}
           </div>
+
+          {/* Bottom Actions */}
+          <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
+            <button
+              onClick={handlePrev}
+              disabled={currentIdx === 0 || isTransitioning}
+              className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                currentIdx === 0 ? "opacity-0 cursor-default" : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              }`}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>{ui.diagnose.prevQuestion}</span>
+            </button>
+
+            <span className="text-xs text-gray-400">
+              {lang === "ja" ? "直感でお選びください" : "Please answer intuitively"}
+            </span>
+          </div>
         </motion.div>
       </AnimatePresence>
-
-      <div className="mt-8 flex items-center space-x-2 justify-center text-xs text-gray-400">
-        <BadgeInfo className="h-4 w-4 shrink-0 text-gray-300" />
-        <span>すべての質問に回答すると、即座にAIエンジンが性格傾向を構築します。</span>
-      </div>
     </div>
   );
 }

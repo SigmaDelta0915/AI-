@@ -3,6 +3,7 @@ import { Sparkles, RefreshCw, Star, Heart, ArrowRight, Share2, Play, ExternalLin
 import { DiagnosisResult, RecommendedAnime } from "../types";
 import { motion } from "motion/react";
 import { translateGenreToJapanese } from "../data/fallbackAnime";
+import { useLanguage } from "../context/LanguageContext";
 
 interface ResultViewProps {
   result: DiagnosisResult | null;
@@ -19,6 +20,7 @@ export default function ResultView({
   favorites,
   toggleFavorite,
 }: ResultViewProps) {
+  const { lang, ui } = useLanguage();
   const [nickname, setNickname] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
   const [showShareCardMode, setShowShareCardMode] = useState<boolean>(false);
@@ -26,12 +28,12 @@ export default function ResultView({
   if (!result) {
     return (
       <div className="mx-auto max-w-xl py-24 text-center">
-        <p className="text-gray-500">診断結果が見つかりません。診断を最初から開始してください。</p>
+        <p className="text-gray-500">{lang === "ja" ? "診断結果が見つかりません。診断を最初から開始してください。" : "No diagnosis result found. Please start from the beginning."}</p>
         <button
           onClick={() => setView("diagnose")}
           className="mt-4 px-6 py-2.5 bg-rose-500 text-white rounded-xl text-sm font-semibold hover:bg-rose-600 transition-colors"
         >
-          診断を始める
+          {ui.home.startDiagnosisBtn}
         </button>
       </div>
     );
@@ -43,13 +45,17 @@ export default function ResultView({
   };
 
   const handleShareTwitter = () => {
-    const text = `【アニメ診断 結果】私の診断タイプは『${result.typeName}』でした！\nあなたに本当に合うおすすめアニメをAIが無料診断してくれます！ #アニメ診断 #AI診断 #おすすめアニメ`;
+    const text = lang === "ja" 
+      ? `【アニメ診断 結果】私の診断タイプは『${result.typeName}』でした！\nあなたに本当に合うおすすめアニメをAIが無料診断してくれます！ #アニメ診断 #AI診断 #おすすめアニメ`
+      : `[Anime Diagnosis Result] My personality type is "${result.typeName}"!\nDiscover your anime match with AI! #AnimeDiagnose #AIAnimeMatch`;
     const url = window.location.href;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, "_blank");
   };
 
   const handleShareLine = () => {
-    const text = `私の診断タイプは『${result.typeName}』でした！【アニメ診断】`;
+    const text = lang === "ja" 
+      ? `私の診断タイプは『${result.typeName}』でした！【アニメ診断】`
+      : `My Anime Diagnosis Result is "${result.typeName}"! [Anime Diagnose]`;
     const url = window.location.href;
     window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank");
   };
@@ -65,10 +71,10 @@ export default function ResultView({
       >
         <span className="inline-flex items-center space-x-1.5 rounded-full bg-violet-100/70 px-4 py-1.5 text-xs font-bold text-violet-600">
           <Award className="h-4 w-4" />
-          <span>AI性格分析 完了</span>
+          <span>{ui.result.aiAnalysisComplete}</span>
         </span>
-        <h1 className="text-3xl font-black text-gray-900 sm:text-4xl tracking-tight">あなたの診断結果</h1>
-        <p className="text-sm text-gray-400">Gemini AIが回答パターンのシンクロニシティを紐解き、タイプを特定しました。</p>
+        <h1 className="text-3xl font-black text-gray-900 sm:text-4xl tracking-tight">{ui.result.yourResultTitle}</h1>
+        <p className="text-sm text-gray-400">{ui.result.yourResultSub}</p>
       </motion.div>
 
       {/* Profile Premium Glassmorphism Block */}
@@ -83,7 +89,7 @@ export default function ResultView({
         <div className="absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-violet-400/10 blur-3xl"></div>
 
         <div className="relative z-10 text-center space-y-6">
-          <p className="text-xs font-bold text-rose-500 uppercase tracking-widest font-mono">YOUR ANIME PERSONALITY</p>
+          <p className="text-xs font-bold text-rose-500 uppercase tracking-widest font-mono">{ui.result.personalityTypeHeader}</p>
           
           <div className="inline-block relative">
             <h2 className="text-3xl font-black tracking-tight text-gray-900 sm:text-4xl bg-gradient-to-r from-rose-500 via-pink-500 to-violet-600 bg-clip-text text-transparent px-4">
@@ -109,7 +115,7 @@ export default function ResultView({
           </div>
 
           {/* Virality sharing buttons & Custom Share Mode */}
-          <div className="pt-6 border-t border-gray-100 dark:border-slate-800 flex flex-col items-center space-y-4">
+          <div className="pt-6 border-t border-gray-100 flex flex-col items-center space-y-4">
             <div className="flex flex-wrap items-center justify-center gap-3">
               <button
                 onClick={() => setShowShareCardMode(!showShareCardMode)}
@@ -121,16 +127,11 @@ export default function ResultView({
                 id="toggle-share-mode-btn"
               >
                 <Camera className="h-4 w-4" />
-                <span>{showShareCardMode ? "シェアモードを閉じる" : "カスタム・シェアカードを作る"}</span>
+                <span>{showShareCardMode ? (lang === "ja" ? "シェアモードを閉じる" : "Close Share Mode") : ui.result.customShareCardBtn}</span>
               </button>
 
               <button
-                onClick={() => {
-                  const prefix = nickname ? `${nickname}さんのアニメ診断結果は『${result.typeName}』でした！\n` : "";
-                  const text = `${prefix}【アニメ診断 結果】私の診断タイプは『${result.typeName}』でした！\nあなたに本当に合うおすすめアニメをAIが無料診断してくれます！ #アニメ診断 #AI診断 #おすすめアニメ`;
-                  const url = window.location.href;
-                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, "_blank");
-                }}
+                onClick={handleShareTwitter}
                 className="px-4 py-2.5 bg-black hover:bg-gray-900 text-white rounded-xl text-xs font-semibold transition-colors flex items-center space-x-1.5 shadow"
                 id="share-twitter-btn"
               >
@@ -138,12 +139,7 @@ export default function ResultView({
               </button>
 
               <button
-                onClick={() => {
-                  const prefix = nickname ? `${nickname}さんの診断結果は『${result.typeName}』！\n` : "";
-                  const text = `${prefix}私の診断タイプは『${result.typeName}』でした！【アニメ診断】`;
-                  const url = window.location.href;
-                  window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank");
-                }}
+                onClick={handleShareLine}
                 className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold transition-colors flex items-center space-x-1.5 shadow"
                 id="share-line-btn"
               >
@@ -271,9 +267,9 @@ export default function ResultView({
         <div className="text-center sm:text-left space-y-1">
           <h2 className="text-2xl font-extrabold text-gray-900 flex items-center justify-center sm:justify-start space-x-2">
             <Sparkles className="h-6 w-6 text-rose-500" />
-            <span>AI推薦の厳選アニメ作品</span>
+            <span>{ui.result.recommendedTitle}</span>
           </h2>
-          <p className="text-sm text-gray-400">あなたに刺さる明確な推薦コメント付きでお届けします。</p>
+          <p className="text-sm text-gray-400">{ui.result.recommendedSub}</p>
         </div>
 
         <div className="space-y-6">
@@ -308,15 +304,15 @@ export default function ResultView({
                     ) : (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-gray-100 text-gray-400 p-4 text-center">
                         <Play className="h-8 w-8 text-gray-300 mb-2" />
-                        <span className="text-[10px] font-semibold">イメージ取得中</span>
+                        <span className="text-[10px] font-semibold">{lang === "ja" ? "イメージ取得中" : "Loading Cover"}</span>
                       </div>
                     )}
 
                     {/* Quality Badge */}
                     {score && (
-                      <div className="absolute bottom-2.5 left-2.5 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm" title="診断ユーザー満足度">
+                      <div className="absolute bottom-2.5 left-2.5 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>満足度 {score}</span>
+                        <span>{score}</span>
                       </div>
                     )}
 
@@ -339,7 +335,7 @@ export default function ResultView({
                           {mainTitle}
                         </h3>
                         <p className="text-xs text-gray-400 mt-0.5">
-                          {rec.media?.studios?.nodes?.[0]?.name || "情報未登録"} {rec.media?.startDate?.year ? `・ ${rec.media.startDate.year}年` : ""}
+                          {rec.media?.studios?.nodes?.[0]?.name || (lang === "ja" ? "情報未登録" : "Unknown Studio")} {rec.media?.startDate?.year ? `・ ${rec.media.startDate.year}` : ""}
                         </p>
                       </div>
 
@@ -360,7 +356,7 @@ export default function ResultView({
                       <div className="flex flex-wrap gap-1">
                         {rec.media.genres.map((g, gIdx) => (
                           <span key={gIdx} className="inline-block rounded bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-600">
-                            {translateGenreToJapanese(g)}
+                            {lang === "ja" ? translateGenreToJapanese(g) : g}
                           </span>
                         ))}
                       </div>
@@ -370,7 +366,7 @@ export default function ResultView({
                     <div className="bg-gradient-to-r from-gray-50 to-white/30 rounded-xl p-3 border border-gray-100/60 mt-3">
                       <p className="text-xs font-bold text-rose-600 flex items-center space-x-1 mb-1">
                         <Sparkles className="h-3.5 w-3.5 text-rose-500" />
-                        <span>AIによる推薦理由</span>
+                        <span>{ui.result.aiReasonBadge}</span>
                       </p>
                       <p className="text-xs text-gray-600 leading-relaxed">
                         {rec.reason}
@@ -387,7 +383,7 @@ export default function ResultView({
                         id={`result-detail-btn-${animeId}`}
                       >
                         <Play className="h-3 w-3 fill-current" />
-                        <span>作品詳細を見る</span>
+                        <span>{ui.result.viewDetailsBtn}</span>
                       </button>
                     )}
                     
@@ -398,7 +394,7 @@ export default function ResultView({
                       referrerPolicy="no-referrer"
                       className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-bold hover:bg-gray-50 hover:text-rose-500 transition-colors"
                     >
-                      <span>U-NEXT で探す</span>
+                      <span>{lang === "ja" ? "U-NEXT で探す" : "Search on U-NEXT"}</span>
                       <ExternalLink className="h-3 w-3 text-gray-400" />
                     </a>
                     <a
@@ -407,7 +403,7 @@ export default function ResultView({
                       referrerPolicy="no-referrer"
                       className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-bold hover:bg-gray-50 hover:text-rose-500 transition-colors"
                     >
-                      <span>DMM TV で探す</span>
+                      <span>{lang === "ja" ? "DMM TV で探す" : "Search on DMM TV"}</span>
                       <ExternalLink className="h-3 w-3 text-gray-400" />
                     </a>
                   </div>
@@ -421,8 +417,8 @@ export default function ResultView({
       {/* Retake section */}
       <section className="flex flex-col sm:flex-row items-center justify-between p-6 rounded-3xl border border-gray-100 bg-gray-50/50 gap-4">
         <div>
-          <h3 className="text-sm font-bold text-gray-900">回答をやり直しますか？</h3>
-          <p className="text-xs text-gray-400 mt-0.5">別の価値観や気分で回答すると、異なる診断タイプや新しいアニメとの出会いがあります。</p>
+          <h3 className="text-sm font-bold text-gray-900">{lang === "ja" ? "回答をやり直しますか？" : "Want to retake the diagnosis?"}</h3>
+          <p className="text-xs text-gray-400 mt-0.5">{lang === "ja" ? "別の価値観や気分で回答すると、異なる診断タイプや新しいアニメとの出会いがあります。" : "Answering with a different mood or perspective will yield new personality insights and anime matches."}</p>
         </div>
         <button
           onClick={() => setView("diagnose")}
@@ -430,7 +426,7 @@ export default function ResultView({
           id="retake-diagnosis-btn"
         >
           <RefreshCw className="h-3.5 w-3.5" />
-          <span>もう一度診断する</span>
+          <span>{ui.result.retakeBtn}</span>
         </button>
       </section>
     </div>

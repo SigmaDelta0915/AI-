@@ -323,12 +323,12 @@ export async function getAnimeDetail(id: number): Promise<AnimeMedia | null> {
 // --------------------------------------------------------------------------
 // AI Diagnosis API (Express Gemini Proxy -> Smart Client Fallback)
 // --------------------------------------------------------------------------
-export async function runDiagnosis(answers: { [key: number]: string }, categoryScores: { [key: string]: number }): Promise<DiagnosisResult> {
+export async function runDiagnosis(answers: { [key: number]: string }, categoryScores: { [key: string]: number }, lang: "ja" | "en" = "ja"): Promise<DiagnosisResult> {
   try {
     const res = await fetch("/api/diagnose", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answers, categoryScores }),
+      body: JSON.stringify({ answers, categoryScores, lang }),
     });
 
     const parsed = await safeJsonResponse<DiagnosisResult>(res);
@@ -346,11 +346,11 @@ export async function runDiagnosis(answers: { [key: number]: string }, categoryS
   }
 
   // CLIENT-SIDE FALLBACK DIAGNOSIS GENERATOR (Runs seamlessly on Vercel / Static Hosting)
-  return generateClientFallbackDiagnosis(categoryScores);
+  return generateClientFallbackDiagnosis(categoryScores, lang);
 }
 
 // Helper: Smart Rule-Based Diagnosis Engine for static environments (Vercel/GitHub Pages)
-async function generateClientFallbackDiagnosis(categoryScores: { [key: string]: number }): Promise<DiagnosisResult> {
+async function generateClientFallbackDiagnosis(categoryScores: { [key: string]: number }, lang: "ja" | "en" = "ja"): Promise<DiagnosisResult> {
   // Sort categories by score
   const sorted = Object.entries(categoryScores || {}).sort((a, b) => b[1] - a[1]);
   const topCategory = sorted[0]?.[0] || "action";
@@ -363,7 +363,7 @@ async function generateClientFallbackDiagnosis(categoryScores: { [key: string]: 
     candidates: Array<{ title: string; reason: string }>;
   }
 
-  const PRESETS: Record<string, CategoryConfig> = {
+  const PRESETS_JA: Record<string, CategoryConfig> = {
     depressive: {
       typeName: "深淵なる絶望＆鬱展開・心理カタルシス探求者",
       typeDescription: "理不尽な世界観、人間の業や複雑な心理的葛藤、怒濤の鬱展開から生まれる圧倒的なカタルシスに強く惹かれるタイプです。心が沈んでいる時や鬱々とした気分の時ほど、綺麗事ではない重厚なダーク世界観や絶望と向き合う物語が深く心に刺さります。",
@@ -483,6 +483,120 @@ async function generateClientFallbackDiagnosis(categoryScores: { [key: string]: 
     }
   };
 
+  const PRESETS_EN: Record<string, CategoryConfig> = {
+    depressive: {
+      typeName: "Dark Abyss & Psychological Catharsis Seeker",
+      typeDescription: "You are strongly drawn to dark, intricate storylines, heavy psychological struggles, and profound catharsis born from challenging, dark worldviews.",
+      keyTraits: ["#DarkAnime", "#PsychologicalCatharsis", "#HeavyLore", "#TragicMasterpiece", "#DeepStory"],
+      candidates: [
+        { title: "Puella Magi Madoka Magica", reason: "An astonishing dark masterpiece that defies magical girl tropes with gripping suspense and deep emotional impact." },
+        { title: "Re:ZERO -Starting Life in Another World-", reason: "A harrowing journey of a powerless boy repeatedly fighting cruel fate and despair through time resets." },
+        { title: "Made in Abyss", reason: "A deceptively cute yet brutally beautiful exploration into a mysterious abyss packed with haunting twists." },
+        { title: "Steins;Gate", reason: "An unforgettable time-travel thriller where saving loved ones requires enduring tragic timelines to achieve catharsis." },
+        { title: "PSYCHO-PASS", reason: "A gritty cyberpunk crime series dissecting morality and human flaws in a dystopian futuristic society." },
+        { title: "Cyberpunk: Edgerunners", reason: "An intoxicating dive into Night City's madness with high-octane action and a tragic, haunting romance." },
+      ]
+    },
+    action: {
+      typeName: "High-Octane Battle & Passionate Fighter",
+      typeDescription: "You crave breathtaking battle animation quality, fiery convictions, and heroic struggles where unbreakable bonds overcome impossible odds.",
+      keyTraits: ["#GodTierAnimation", "#HighOctaneBattles", "#EpicScale", "#HeroicSpirit"],
+      candidates: [
+        { title: "Attack on Titan", reason: "An epic masterpiece delivering non-stop tension, mind-blowing plot twists, and peak battle action." },
+        { title: "Demon Slayer: Kimetsu no Yaiba", reason: "Stunning swordplay animation paired with a heart-wrenching tale of family devotion." },
+        { title: "Jujutsu Kaisen", reason: "Fast, stylish cursed energy combat with incredible characters and flawless fight choreography." },
+        { title: "Chainsaw Man", reason: "Wild, visceral energy and unique dark action that completely reshapes modern action anime." },
+        { title: "My Hero Academia", reason: "An inspiring journey of perseverance, friendship, and heroic ambition against formidable villains." },
+        { title: "Dandadan", reason: "Electrifying supernatural chaos meets heartwarming youth romance and alien battles!" },
+      ]
+    },
+    tear: {
+      typeName: "Profound Emotional Resonance & Tear-Jerker Explorer",
+      typeDescription: "You seek deeply emotional narratives that capture subtle human feelings, unbreakable bonds, and leave a lasting, beautiful impression.",
+      keyTraits: ["#TearJerker", "#EmotionalMasterpiece", "#HumanDrama", "#DeepResonance"],
+      candidates: [
+        { title: "Frieren: Beyond Journey's End", reason: "A gentle, breathtaking story reflecting on time, human connection, and precious memories." },
+        { title: "Violet Evergarden", reason: "A visually gorgeous tale of an auto memory doll learning the meaning of love through letter writing." },
+        { title: "A Silent Voice", reason: "A deeply moving film exploring redemption, communication, and emotional healing between two souls." },
+        { title: "Anohana: The Flower We Saw That Day", reason: "An unforgettable emotional drama of childhood friends reconnecting to grant a ghost's wish." },
+        { title: "Your Lie in April", reason: "A vibrant musical youth drama filled with passion, heartbreak, and inspiring love." },
+        { title: "CLANNAD", reason: "A legendary emotional masterpiece portraying family, love, and life's deepest moments." },
+      ]
+    },
+    mystery: {
+      typeName: "Mind Games & Suspense Mastermind",
+      typeDescription: "You love unraveling complex plot twists, strategic mind games, and high-IQ suspense where every detail holds a hidden clue.",
+      keyTraits: ["#MasterfulPlotTwists", "#MindGames", "#Unpredictable", "#SuspenseThriller"],
+      candidates: [
+        { title: "Steins;Gate", reason: "The gold standard of time travel sci-fi with incredible plot loop resolution and thrilling suspense." },
+        { title: "The Promised Neverland", reason: "A heart-pounding high-IQ escape thriller that grabs your attention from the very first episode." },
+        { title: "The Apothecary Diaries", reason: "A refreshing mystery series in an imperial court solved by Maomao's sharp mind and poison expertise." },
+        { title: "Death Note", reason: "The iconic psychological battle of wits between a genius vigilante and a brilliant detective." },
+        { title: "MONSTER", reason: "A dense, sophisticated psychological crime thriller tailored for fans who appreciate deep storytelling." },
+      ]
+    },
+    sliceOfLife: {
+      typeName: "Cozy Healing & Zero-Stress Life Master",
+      typeDescription: "You adore heartwarming, peaceful stories that wash away daily fatigue with witty banter, soothing atmospheres, and joyful everyday life.",
+      keyTraits: ["#StressFree", "#CozyLife", "#UltimateHealing", "#WittyHumor"],
+      candidates: [
+        { title: "Laid-Back Camp", reason: "Delicious outdoor cooking and serene natural scenery that gently relaxes your mind." },
+        { title: "Bocchi the Rock!", reason: "An uplifting comedy of an anxious girl growing through indie rock band music." },
+        { title: "SPY x FAMILY", reason: "A delightful family comedy combining spy missions, telepathy, and hilarious heartwarming everyday chaos." },
+        { title: "My Dress-Up Darling", reason: "A sweet, energetic story of two passionate high schoolers bonding over cosplay and craftsmanship." },
+        { title: "Non Non Biyori", reason: "Charming countryside days that offer a peaceful escape with humor and soothing seasonal beauty." },
+      ]
+    },
+    sciFi: {
+      typeName: "Cyberpunk & Time-Bending Sci-Fi Enthusiast",
+      typeDescription: "You are fascinated by grand futuristic settings, artificial intelligence, time loops, and thought-provoking philosophical themes.",
+      keyTraits: ["#FuturisticSciFi", "#DeepLore", "#AIandHumanity", "#ImmersiveWorld"],
+      candidates: [
+        { title: "Cyberpunk: Edgerunners", reason: "Visually stunning Night City madness packed with hyper-speed action and emotional punch." },
+        { title: "Vivy: Fluorite Eye's Song", reason: "An AI singer battling through 100 years of history to prevent destruction, featuring epic battles." },
+        { title: "PSYCHO-PASS", reason: "A thought-provoking cyberpunk police drama investigating justice in a futuristic society." },
+        { title: "86 EIGHTY-SIX", reason: "A compelling military sci-fi drama exploring humanity, sacrifice, and survival on the front lines." },
+      ]
+    },
+    romance: {
+      typeName: "Pure Romance & Heart-Fluttering Rom-Com Specialist",
+      typeDescription: "You cherish sweet romantic stories, charming chemistry, and delicate relationship growth that brings a big smile to your face.",
+      keyTraits: ["#HeartFluttering", "#PureRomance", "#RomComGold", "#SweetChemistry"],
+      candidates: [
+        { title: "Kaguya-sama: Love is War", reason: "A hilarious battle of romantic wits between two proud geniuses afraid to confess first." },
+        { title: "Horimiya", reason: "A sweet, genuine high school romance showing how opposites attract and support each other." },
+        { title: "The Dangers in My Heart", reason: "A delicate, masterfully written pure romance that warms your heart as feelings bloom." },
+        { title: "Kimi ni Todoke: From Me to You", reason: "A timeless, heartwarming pure love story that fills you with wholesome joy." },
+        { title: "The Quintessential Quintuplets", reason: "A fun, charming rom-com where a tutor guides five distinct sisters towards success and love." },
+      ]
+    },
+    sports: {
+      typeName: "Youth Passion & Peak Sports Entertainer",
+      typeDescription: "You thrive on intense sports drama, team camaraderie, and the electrifying rush of characters pushing past their limits.",
+      keyTraits: ["#YouthSports", "#Teamwork", "#ThrillingMatches", "#OvercomingDefeat"],
+      candidates: [
+        { title: "Haikyu!!", reason: "An exhilarating volleyball anime where every point and character arc resonates emotionally." },
+        { title: "BLUE LOCK", reason: "An intense, ego-driven soccer survival show packed with electrifying excitement." },
+        { title: "Ping Pong the Animation", reason: "A stylish, artistic sports drama capturing the passion and rivalries of table tennis." },
+        { title: "SLAM DUNK", reason: "A legendary basketball anime following high school players giving their all for the game." },
+      ]
+    },
+    isekai: {
+      typeName: "Epic Isekai & Fantasy Adventure Explorer",
+      typeDescription: "You love stepping into magical worlds, overpowered skills, adventurer guilds, and grand fantasy quests that offer pure escape.",
+      keyTraits: ["#IsekaiFantasy", "#OverpoweredSkills", "#GrandAdventure", "#PureEscape"],
+      candidates: [
+        { title: "That Time I Got Reincarnated as a Slime", reason: "A rewarding fantasy story of building a monster nation from scratch with fun companions." },
+        { title: "Re:ZERO -Starting Life in Another World-", reason: "A dark, intense fantasy thriller about rewriting tragic destiny through sheer willpower." },
+        { title: "Mushoku Tensei: Jobless Reincarnation", reason: "A stunningly animated fantasy epic detailing a second chance at life in a rich world." },
+        { title: "Konosuba: God's Blessing on This Wonderful World!", reason: "The ultimate comedy isekai featuring a hilarious cast of dysfunctional adventurers." },
+        { title: "Overlord", reason: "An entertaining dark fantasy of an supreme undead ruler conquering an unknown magical realm." },
+      ]
+    }
+  };
+
+  const PRESETS = lang === "en" ? PRESETS_EN : PRESETS_JA;
+
   const topConfig = PRESETS[topCategory] || PRESETS.action;
   const secondConfig = PRESETS[secondCategory] || PRESETS.sliceOfLife;
 
@@ -519,6 +633,6 @@ async function generateClientFallbackDiagnosis(categoryScores: { [key: string]: 
     typeDescription: topConfig.typeDescription,
     keyTraits: topConfig.keyTraits,
     recommendations: recommendationsWithMedia,
-    createdAt: new Date().toLocaleDateString("ja-JP"),
+    createdAt: new Date().toLocaleDateString(lang === "en" ? "en-US" : "ja-JP"),
   };
 }

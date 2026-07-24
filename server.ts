@@ -755,13 +755,13 @@ app.post("/api/admin/test-diagnose", async (req, res) => {
 });
 
 // Helper: Server-side fallback generator if Gemini API key is missing or unauthenticated
-function generateServerFallbackDiagnosis(categoryScores: { [key: string]: number }) {
+function generateServerFallbackDiagnosis(categoryScores: { [key: string]: number }, lang: "ja" | "en" = "ja") {
   const sorted = Object.entries(categoryScores || {}).sort((a, b) => b[1] - a[1]);
   const topCategory = sorted[0]?.[0] || "action";
   const secondCategory = sorted[1]?.[0] || "sliceOfLife";
   const thirdCategory = sorted[2]?.[0] || "comedy";
 
-  const MASTER_ANIME_CANDIDATES: Array<{ title: string; reason: string; categories: string[] }> = [
+  const MASTER_ANIME_CANDIDATES_JA: Array<{ title: string; reason: string; categories: string[] }> = [
     { title: "進撃の巨人", reason: "圧倒的なスケールと緊張感あふれるアクション。あなたの求める熱量と興奮を最高峰のクオリティで叶えます。", categories: ["action", "mystery", "drama", "tear"] },
     { title: "鬼滅の刃", reason: "家族を守る熱い意志と美しい剣戟アニメーション。息をのむ戦闘シーンと心揺さぶる感動が同居しています。", categories: ["action", "tear", "drama"] },
     { title: "呪術廻戦", reason: "スピーディーかつスタイリッシュな洗練された呪術バトル。個性的で魅力あふれるキャラクターに惹かれます。", categories: ["action", "mystery", "sciFi"] },
@@ -797,7 +797,30 @@ function generateServerFallbackDiagnosis(categoryScores: { [key: string]: number
     { title: "この素晴らしい世界に祝福を！", reason: "残念な仲間たちと贈る異世界コメディの最高峰！とにかく爆笑したい時におすすめです。", categories: ["isekai", "comedy"] },
   ];
 
-  const HYBRID_MAP: Record<string, { typeName: string; typeDescription: string; keyTraits: string[] }> = {
+  const MASTER_ANIME_CANDIDATES_EN: Array<{ title: string; reason: string; categories: string[] }> = [
+    { title: "Attack on Titan", reason: "Overwhelming scale and intense battle action delivering non-stop excitement.", categories: ["action", "mystery", "drama", "tear"] },
+    { title: "Demon Slayer: Kimetsu no Yaiba", reason: "Stunning animation paired with an unforgettable story of sibling devotion.", categories: ["action", "tear", "drama"] },
+    { title: "Jujutsu Kaisen", reason: "Stylish cursed energy combat with memorable characters and top-tier action.", categories: ["action", "mystery", "sciFi"] },
+    { title: "Chainsaw Man", reason: "Raw energy and unique dark action that completely redefines anime tropes.", categories: ["action", "mystery", "comedy"] },
+    { title: "My Hero Academia", reason: "An inspiring superhero journey packed with perseverance and emotional battles.", categories: ["action", "sports", "tear"] },
+    { title: "Dandadan", reason: "Supernatural chaotic battles meets charming youth occult comedy!", categories: ["action", "comedy", "romance"] },
+    { title: "Kaiju No. 8", reason: "A gritty adult protagonist reclaiming his dreams through thrilling monster battles.", categories: ["action", "sciFi", "comedy"] },
+    { title: "Mob Psycho 100", reason: "Incredible animation portraying psychic power fights and genuine personal growth.", categories: ["action", "comedy", "tear"] },
+    { title: "Code Geass: Lelouch of the Rebellion", reason: "A masterpiece of intellect, strategy, and mind-blowing plot twists.", categories: ["action", "mystery", "sciFi", "drama"] },
+    { title: "Frieren: Beyond Journey's End", reason: "A gentle, breathtaking journey reflecting on time, memories, and human connections.", categories: ["tear", "sliceOfLife", "drama"] },
+    { title: "Violet Evergarden", reason: "A visually stunning emotional story of discovering the true meaning of love.", categories: ["tear", "romance", "drama"] },
+    { title: "A Silent Voice", reason: "A deeply moving tale exploring redemption, communication, and emotional healing.", categories: ["tear", "romance", "drama"] },
+    { title: "Steins;Gate", reason: "The pinnacle of time travel sci-fi with extraordinary suspense and catharsis.", categories: ["mystery", "sciFi", "tear"] },
+    { title: "PSYCHO-PASS", reason: "A thought-provoking cyberpunk thriller dissecting morality and justice.", categories: ["sciFi", "mystery", "action"] },
+    { title: "Kaguya-sama: Love is War", reason: "A hilarious battle of romantic wits between two proud geniuses.", categories: ["romance", "comedy"] },
+    { title: "Horimiya", reason: "A sweet, genuine high school romance showing how opposites attract.", categories: ["romance", "sliceOfLife"] },
+    { title: "Haikyu!!", reason: "An exhilarating sports drama where every volleyball match resonates emotionally.", categories: ["sports", "action", "tear"] },
+    { title: "BLUE LOCK", reason: "An intense, ego-driven soccer survival show filled with thrilling action.", categories: ["sports", "action", "mystery"] },
+    { title: "That Time I Got Reincarnated as a Slime", reason: "A fun fantasy story of building a monster nation from scratch.", categories: ["isekai", "action", "comedy"] },
+    { title: "Re:ZERO -Starting Life in Another World-", reason: "A dark, intense thriller of a boy rewriting fate through time resets.", categories: ["isekai", "tear", "mystery", "action"] },
+  ];
+
+  const HYBRID_MAP_JA: Record<string, { typeName: string; typeDescription: string; keyTraits: string[] }> = {
     "action_mystery": {
       typeName: "【闇の知略】ダークヒーロー＆頭脳サスペンスマニア",
       typeDescription: "圧倒的なバトル作画の興奮に加え、裏に隠された複雑な策略や伏線を解き明かすカタルシスを求めるタイプです。一筋縄ではいかないダークヒーローや予測不能な展開に強い快感を覚えます。",
@@ -850,13 +873,70 @@ function generateServerFallbackDiagnosis(categoryScores: { [key: string]: number
     }
   };
 
+  const HYBRID_MAP_EN: Record<string, { typeName: string; typeDescription: string; keyTraits: string[] }> = {
+    "action_mystery": {
+      typeName: "[Dark Strategy] Dark Hero & Suspense Mastermind",
+      typeDescription: "You are drawn to stunning battle choreography combined with intricate plots, dark heroes, and unpredictable plot twists.",
+      keyTraits: ["#GodTierAnimation", "#MindGames", "#DarkHero", "#Unpredictable"]
+    },
+    "action_tear": {
+      typeName: "[Unyielding Bond] Passionate Battle & Emotional Explorer",
+      typeDescription: "You love high-stakes battles born from unbreakable bonds, where intense action meets deeply emotional storytelling.",
+      keyTraits: ["#IntenseBattles", "#TearJerker", "#UnbreakableBonds", "#EmotionalImpact"]
+    },
+    "action_comedy": {
+      typeName: "[High Tension] Battle Comedy & Entertainment Specialist",
+      typeDescription: "You thrive on flashy action perfectly mixed with laugh-out-loud comedy and high energy entertainment.",
+      keyTraits: ["#ActionComedy", "#Hilarious", "#FastPaced", "#StressRelief"]
+    },
+    "action_isekai": {
+      typeName: "[Epic Isekai] Fantasy World Overpowered Adventurer",
+      typeDescription: "You love grand adventure fantasy with swords, magic, overpowered skills, and satisfying victories in otherworldly realms.",
+      keyTraits: ["#IsekaiOverpowered", "#EpicBattles", "#FantasyWorld", "#Satisfying"]
+    },
+    "sliceOfLife_comedy": {
+      typeName: "[Zero Stress] Cozy Life & Comedy Master",
+      typeDescription: "You enjoy warm, relaxing stories filled with witty banter and cozy everyday moments that melt away daily stress.",
+      keyTraits: ["#StressFree", "#CozySliceOfLife", "#ComedyGold", "#Relaxing"]
+    },
+    "sliceOfLife_romance": {
+      typeName: "[Sweet Youth] Pure Romance & Everyday Cozy Lover",
+      typeDescription: "You love watching heart-fluttering romances blossom amidst charming, relatable everyday school or work life.",
+      keyTraits: ["#HeartFluttering", "#YouthRomance", "#PureLove", "#CozyVibes"]
+    },
+    "mystery_sciFi": {
+      typeName: "[Time & Mind] Cyberpunk & Mind-Bending Sci-Fi Analyst",
+      typeDescription: "You crave mind-bending sci-fi mysteries involving time travel, cybernetics, and complex foreshadowing.",
+      keyTraits: ["#MasterfulPlotTwists", "#CyberpunkSciFi", "#MindBending", "#DeepLore"]
+    },
+    "mystery_tear": {
+      typeName: "[Profound Truth] Emotional Mystery Analyst",
+      typeDescription: "You are deeply moved when unraveling heartbreaking truths, mysteries born of love, and profound human drama.",
+      keyTraits: ["#EmotionalMystery", "#TouchOfSadness", "#UnravelingTruth", "#DeepAftertaste"]
+    },
+    "romance_tear": {
+      typeName: "[Heart-wrenching] Emotional Pure Romance Specialist",
+      typeDescription: "You dedicate your heart to passionate, beautiful, and deeply emotional love stories that bring tears to your eyes.",
+      keyTraits: ["#EmotionalRomance", "#TearJerker", "#DestinedLove", "#BeautifulArt"]
+    },
+    "sports_tear": {
+      typeName: "[Youth & Sweat] Passionate Sports & Drama Explorer",
+      typeDescription: "You are thrilled by youth sports anime where teamwork, overcoming defeat, and intense matches bring tears of joy.",
+      keyTraits: ["#YouthSports", "#Teamwork", "#OvercomingDefeat", "#EmotionalMatches"]
+    }
+  };
+
+  const isEn = lang === "en";
+  const MASTER_ANIME_CANDIDATES = isEn ? MASTER_ANIME_CANDIDATES_EN : MASTER_ANIME_CANDIDATES_JA;
+  const HYBRID_MAP = isEn ? HYBRID_MAP_EN : HYBRID_MAP_JA;
+
   const comboKey = `${topCategory}_${secondCategory}`;
   const reverseKey = `${secondCategory}_${topCategory}`;
   const hybridPreset = HYBRID_MAP[comboKey] || HYBRID_MAP[reverseKey];
 
-  let typeName = hybridPreset?.typeName || `【覚醒型】${topCategory.toUpperCase()}＆${secondCategory.toUpperCase()}プロフェッショナル`;
-  let typeDescription = hybridPreset?.typeDescription || `ユーザーの好みの中心である「${topCategory}」と「${secondCategory}」の要素が高いレベルで融合した、ストーリー展開と作品美学にこだわりのあるアニメ通タイプです。`;
-  let keyTraits = hybridPreset?.keyTraits || [`#${topCategory}好き`, `#${secondCategory}好き`, "#圧倒的没入感", "#神アニメ探求"];
+  let typeName = hybridPreset?.typeName || (isEn ? `[Specialist] ${topCategory.toUpperCase()} & ${secondCategory.toUpperCase()} Connoisseur` : `【覚醒型】${topCategory.toUpperCase()}＆${secondCategory.toUpperCase()}プロフェッショナル`);
+  let typeDescription = hybridPreset?.typeDescription || (isEn ? `An anime expert profile blending ${topCategory} and ${secondCategory} elements with high appreciation for narrative depth and animation aesthetics.` : `ユーザーの好みの中心である「${topCategory}」と「${secondCategory}」の要素が高いレベルで融合した、ストーリー展開と作品美学にこだわりのあるアニメ通タイプです。`);
+  let keyTraits = hybridPreset?.keyTraits || (isEn ? [`#${topCategory}Fan`, `#${secondCategory}Lover`, "#ImmersiveExperience", "#TopTierAnime"] : [`#${topCategory}好き`, `#${secondCategory}好き`, "#圧倒的没入感", "#神アニメ探求"]);
 
   const shuffle = <T>(array: T[]): T[] => {
     const arr = [...array];
@@ -883,7 +963,7 @@ function generateServerFallbackDiagnosis(categoryScores: { [key: string]: number
 
 // API endpoint for Diagnosis processing using Gemini with robust fallback
 app.post("/api/diagnose", async (req, res) => {
-  const { answers, categoryScores } = req.body;
+  const { answers, categoryScores, lang } = req.body;
 
   if (!answers || typeof answers !== "object") {
     return res.status(400).json({ error: "Answers format is invalid." });
@@ -909,6 +989,10 @@ app.post("/api/diagnose", async (req, res) => {
   }
   if (!promptText.includes(scoresSummary)) {
     promptText += `\n\n【カテゴリー別スコア集計】\n${scoresSummary}`;
+  }
+
+  if (lang === "en") {
+    promptText += `\n\nCRITICAL LANGUAGE REQUIREMENT: The user has selected ENGLISH mode. You MUST generate ALL text in ENGLISH language, including 'typeName' (a creative English title/personality title), 'typeDescription' (detailed English analysis), 'keyTraits' (hashtags in English e.g. #DarkAnime, #ActionMaster), and recommendation 'reason' fields.`;
   }
 
   let parsedResult: { typeName: string; typeDescription: string; keyTraits: string[]; recommendations: Array<{ title: string; reason: string }> };
@@ -968,7 +1052,7 @@ app.post("/api/diagnose", async (req, res) => {
     parsedResult = JSON.parse(aiText);
   } catch (error: any) {
     console.warn("Gemini API call skipped or failed, using smart rule-based diagnosis engine:", error?.message || error);
-    parsedResult = generateServerFallbackDiagnosis(categoryScores || {});
+    parsedResult = generateServerFallbackDiagnosis(categoryScores || {}, lang as "ja" | "en");
   }
 
     // Now, resolve recommended titles from Gemini against the AniList API in parallel!

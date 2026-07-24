@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { AnimeCardImage } from "./AnimeCardImage";
 import { getPopularAnime } from "../services/animeService";
 import { FALLBACK_POPULAR_ANIME } from "../data/fallbackAnime";
+import { useLanguage } from "../context/LanguageContext";
 
 interface HomeViewProps {
   setView: (view: string) => void;
@@ -21,6 +22,7 @@ export default function HomeView({
   favorites,
   toggleFavorite
 }: HomeViewProps) {
+  const { lang, t, ui } = useLanguage();
   const [popularAnime, setPopularAnime] = useState<AnimeMedia[]>(FALLBACK_POPULAR_ANIME);
   const [loading, setLoading] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -44,18 +46,18 @@ export default function HomeView({
   }, []);
 
   const genres = [
-    { name: "バトル・アクション", queryName: "Action", icon: "⚔️", color: "from-amber-400 to-orange-500" },
-    { name: "恋愛・ラブコメ", queryName: "Romance", icon: "❤️", color: "from-pink-400 to-rose-500" },
-    { name: "感動・ドラマ", queryName: "Drama", icon: "😭", color: "from-indigo-400 to-purple-500" },
-    { name: "コメディ・ギャグ", queryName: "Comedy", icon: "🤣", color: "from-emerald-400 to-teal-500" },
-    { name: "日常・ほのぼの", queryName: "Slice of Life", icon: "🍀", color: "from-green-400 to-emerald-600" },
-    { name: "ファンタジー・異世界", queryName: "Fantasy", icon: "🪄", color: "from-yellow-400 to-amber-600" },
-    { name: "SF・サイバーパンク", queryName: "Sci-Fi", icon: "🚀", color: "from-cyan-400 to-blue-500" },
-    { name: "推理・ミステリー", queryName: "Mystery", icon: "🔍", color: "from-violet-400 to-indigo-500" },
-    { name: "スポーツ・熱血", queryName: "Sports", icon: "⚽", color: "from-red-400 to-rose-600" },
-    { name: "サスペンス・スリラー", queryName: "Thriller", icon: "⚡", color: "from-zinc-500 to-gray-800" },
-    { name: "音楽・バンド", queryName: "Music", icon: "🎵", color: "from-fuchsia-400 to-pink-600" },
-    { name: "冒険・アドベンチャー", queryName: "Adventure", icon: "🧭", color: "from-amber-500 to-yellow-600" },
+    { name: lang === "ja" ? "バトル・アクション" : "Action & Battle", queryName: "Action", icon: "⚔️" },
+    { name: lang === "ja" ? "恋愛・ラブコメ" : "Romance & Love", queryName: "Romance", icon: "❤️" },
+    { name: lang === "ja" ? "感動・ドラマ" : "Drama & Tearjerker", queryName: "Drama", icon: "😭" },
+    { name: lang === "ja" ? "コメディ・ギャグ" : "Comedy & Gag", queryName: "Comedy", icon: "🤣" },
+    { name: lang === "ja" ? "日常・ほのぼの" : "Slice of Life", queryName: "Slice of Life", icon: "🍀" },
+    { name: lang === "ja" ? "ファンタジー・異世界" : "Fantasy & Isekai", queryName: "Fantasy", icon: "🪄" },
+    { name: lang === "ja" ? "SF・サイバーパンク" : "Sci-Fi & Cyberpunk", queryName: "Sci-Fi", icon: "🚀" },
+    { name: lang === "ja" ? "推理・ミステリー" : "Mystery & Thriller", queryName: "Mystery", icon: "🔍" },
+    { name: lang === "ja" ? "スポーツ・熱血" : "Sports & Passion", queryName: "Sports", icon: "⚽" },
+    { name: lang === "ja" ? "サスペンス・スリラー" : "Suspense & Thriller", queryName: "Thriller", icon: "⚡" },
+    { name: lang === "ja" ? "音楽・バンド" : "Music & Band", queryName: "Music", icon: "🎵" },
+    { name: lang === "ja" ? "冒険・アドベンチャー" : "Adventure", queryName: "Adventure", icon: "🧭" },
   ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -91,7 +93,7 @@ export default function HomeView({
             className="inline-flex items-center space-x-2 rounded-full border border-rose-100 bg-rose-50/60 px-4 py-1.5 text-xs font-semibold text-rose-600 backdrop-blur-sm"
           >
             <Sparkles className="h-3.5 w-3.5" />
-            <span>AI（Gemini）搭載・超精度アプローチ</span>
+            <span>{ui.home.badge}</span>
           </motion.div>
 
           <motion.h1 
@@ -100,9 +102,9 @@ export default function HomeView({
             transition={{ duration: 0.6, delay: 0.15 }}
             className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl"
           >
-            あなたに本当に合うアニメを、
+            {ui.home.heroTitle}
             <span className="block mt-2 bg-gradient-to-r from-rose-500 via-pink-500 to-violet-600 bg-clip-text text-transparent">
-              AI診断。
+              {ui.home.heroSubtitle}
             </span>
           </motion.h1>
 
@@ -112,8 +114,7 @@ export default function HomeView({
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mx-auto max-w-2xl text-lg text-gray-500 leading-relaxed sm:text-xl"
           >
-            15個の直感的な質問から、あなたの深層性格・価値観を徹底分析。
-            厳選された名作と「心に刺さる推薦理由」を今すぐ発見しよう。
+            {ui.home.heroDesc}
           </motion.p>
 
           {/* Quick CTA & Search Button Container */}
@@ -129,7 +130,7 @@ export default function HomeView({
               id="hero-start-diagnosis"
             >
               <Sparkles className="h-5 w-5 animate-pulse" />
-              <span>無料アニメ診断を始める</span>
+              <span>{ui.home.startDiagnosisBtn}</span>
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </button>
 
@@ -137,7 +138,7 @@ export default function HomeView({
             <form onSubmit={handleSearchSubmit} className="relative flex items-center mt-2">
               <input
                 type="text"
-                placeholder="作品名・制作会社などで検索..."
+                placeholder={ui.home.searchPlaceholder}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full rounded-xl border border-gray-200/80 bg-white/70 py-3 pr-12 pl-4 text-sm text-gray-900 shadow-sm backdrop-blur-md outline-none transition-all focus:border-rose-400 focus:bg-white focus:ring-2 focus:ring-rose-500/10 placeholder:text-gray-400"
@@ -160,9 +161,9 @@ export default function HomeView({
         <div className="flex flex-col items-center space-y-2 text-center md:items-start md:text-left mb-8">
           <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl flex items-center space-x-2">
             <Compass className="h-6 w-6 text-rose-500" />
-            <span>人気ジャンルから探す</span>
+            <span>{ui.home.browseGenresTitle}</span>
           </h2>
-          <p className="text-sm text-gray-400">気分やトレンドに合わせて、気になるジャンルから作品を発見。</p>
+          <p className="text-sm text-gray-400">{ui.home.browseGenresSub}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -193,19 +194,19 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* Google AdSense Mock Frame (Integrated visual placeholder) */}
+      {/* Google AdSense Mock Frame */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50 p-4 text-center">
           <div className="absolute top-2 right-2 text-[10px] text-gray-400 font-mono tracking-wider uppercase">ADVERTISEMENT</div>
-          <p className="text-xs text-gray-400 font-medium">スポンサー広告</p>
+          <p className="text-xs text-gray-400 font-medium">{lang === "ja" ? "スポンサー広告" : "Sponsor Ad"}</p>
           <div className="mt-2 flex flex-col md:flex-row items-center justify-between gap-4 py-2 px-4 bg-white/70 rounded-xl border border-gray-100 backdrop-blur-sm">
             <div className="flex items-center space-x-3 text-left">
               <div className="h-10 w-10 shrink-0 bg-rose-100 rounded-lg flex items-center justify-center">
                 <Flame className="h-5 w-5 text-rose-500" />
               </div>
               <div>
-                <p className="text-xs font-bold text-gray-800">最新のアニメが月額550円で見放題！【DMM TV】</p>
-                <p className="text-[11px] text-gray-400">新規登録なら30日間無料体験実施中。新作アニメも最速配信！</p>
+                <p className="text-xs font-bold text-gray-800">{lang === "ja" ? "最新のアニメが月額550円で見放題！【DMM TV】" : "Unlimited Anime Streaming at $5.50/mo! [DMM TV]"}</p>
+                <p className="text-[11px] text-gray-400">{lang === "ja" ? "新規登録なら30日間無料体験実施中。新作アニメも最速配信！" : "30-day free trial for new members. Fast releases for new titles!"}</p>
               </div>
             </div>
             <a
@@ -214,7 +215,7 @@ export default function HomeView({
               referrerPolicy="no-referrer"
               className="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold hover:bg-gray-800 transition-colors shrink-0"
             >
-              無料体験を試す
+              {lang === "ja" ? "無料体験を試す" : "Try Free Trial"}
             </a>
           </div>
         </div>
@@ -226,9 +227,9 @@ export default function HomeView({
           <div className="text-center sm:text-left space-y-1">
             <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl flex items-center justify-center sm:justify-start space-x-2">
               <TrendingUp className="h-6 w-6 text-rose-500" />
-              <span>今、人気の話題作</span>
+              <span>{ui.home.trendingTitle}</span>
             </h2>
-            <p className="text-sm text-gray-400">アニメ診断の利用者が選んだ、満足度の高い注目アニメ作品。</p>
+            <p className="text-sm text-gray-400">{ui.home.trendingSub}</p>
           </div>
           <button
             onClick={() => {
@@ -238,7 +239,7 @@ export default function HomeView({
             className="inline-flex items-center space-x-1 text-sm font-semibold text-rose-500 hover:text-rose-600 transition-colors"
             id="home-view-all-anime"
           >
-            <span>すべての作品を見る</span>
+            <span>{ui.home.viewAllBtn}</span>
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

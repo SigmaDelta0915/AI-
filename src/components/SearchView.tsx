@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { AnimeCardImage } from "./AnimeCardImage";
 import { searchAnime } from "../services/animeService";
 import { translateGenreToJapanese } from "../data/fallbackAnime";
+import { useLanguage } from "../context/LanguageContext";
 
 interface SearchViewProps {
   initialSearch: string;
@@ -15,23 +16,6 @@ interface SearchViewProps {
   toggleFavorite: (id: number) => void;
 }
 
-const GENRE_LIST = [
-  { value: "", label: "すべてのジャンル" },
-  { value: "Action", label: "バトル・アクション" },
-  { value: "Romance", label: "恋愛・ラブコメ" },
-  { value: "Drama", label: "感動・ドラマ" },
-  { value: "Comedy", label: "コメディ・ギャグ" },
-  { value: "Slice of Life", label: "日常・ほのぼの" },
-  { value: "Fantasy", label: "ファンタジー・異世界" },
-  { value: "Sci-Fi", label: "SF・サイバーパンク" },
-  { value: "Mystery", label: "推理・ミステリー" },
-  { value: "Sports", label: "スポーツ・熱血" },
-  { value: "Thriller", label: "サスペンス・スリラー" },
-  { value: "Music", label: "音楽・バンド" },
-  { value: "Adventure", label: "冒険・アドベンチャー" },
-  { value: "Supernatural", label: "オカルト・超能力" },
-];
-
 export default function SearchView({
   initialSearch,
   initialGenre,
@@ -40,6 +24,7 @@ export default function SearchView({
   favorites,
   toggleFavorite,
 }: SearchViewProps) {
+  const { lang, ui } = useLanguage();
   const [search, setSearch] = useState(initialSearch);
   const [genre, setGenre] = useState(initialGenre);
   const [year, setYear] = useState("");
@@ -47,14 +32,29 @@ export default function SearchView({
   const [results, setResults] = useState<AnimeMedia[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const GENRE_LIST = [
+    { value: "", label: lang === "ja" ? "すべてのジャンル" : "All Genres" },
+    { value: "Action", label: lang === "ja" ? "バトル・アクション" : "Action" },
+    { value: "Romance", label: lang === "ja" ? "恋愛・ラブコメ" : "Romance" },
+    { value: "Drama", label: lang === "ja" ? "感動・ドラマ" : "Drama" },
+    { value: "Comedy", label: lang === "ja" ? "コメディ・ギャグ" : "Comedy" },
+    { value: "Slice of Life", label: lang === "ja" ? "日常・ほのぼの" : "Slice of Life" },
+    { value: "Fantasy", label: lang === "ja" ? "ファンタジー・異世界" : "Fantasy" },
+    { value: "Sci-Fi", label: lang === "ja" ? "SF・サイバーパンク" : "Sci-Fi" },
+    { value: "Mystery", label: lang === "ja" ? "推理・ミステリー" : "Mystery" },
+    { value: "Sports", label: lang === "ja" ? "スポーツ・熱血" : "Sports" },
+    { value: "Thriller", label: lang === "ja" ? "サスペンス・スリラー" : "Thriller" },
+    { value: "Music", label: lang === "ja" ? "音楽・バンド" : "Music" },
+    { value: "Adventure", label: lang === "ja" ? "冒険・アドベンチャー" : "Adventure" },
+    { value: "Supernatural", label: lang === "ja" ? "オカルト・超能力" : "Supernatural" },
+  ];
+
   useEffect(() => {
-    // If initial values change (e.g. clicked genre from Home), synchronize
     setSearch(initialSearch);
     setGenre(initialGenre);
   }, [initialSearch, initialGenre]);
 
   useEffect(() => {
-    // Automatic loading when filters are updated!
     const delayDebounceFn = setTimeout(() => {
       fetchResults();
     }, 300);
@@ -98,9 +98,9 @@ export default function SearchView({
       <div className="text-center md:text-left space-y-1">
         <h1 className="text-3xl font-extrabold text-gray-950 tracking-tight flex items-center justify-center md:justify-start space-x-2">
           <Search className="h-7 w-7 text-rose-500" />
-          <span>詳細アニメ検索</span>
+          <span>{ui.search.title}</span>
         </h1>
-        <p className="text-sm text-gray-400">AniListデータベースから、タイトルやジャンルで今すぐお気に入りを発掘。</p>
+        <p className="text-sm text-gray-400">{ui.search.subtitle}</p>
       </div>
 
       {/* Advanced Filter Panel */}
@@ -109,11 +109,11 @@ export default function SearchView({
           
           {/* Keyword Search */}
           <div className="space-y-1 sm:col-span-1">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">キーワード</label>
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ui.search.keywordLabel}</label>
             <div className="relative">
               <input
                 type="text"
-                placeholder="作品名・スタジオ名..."
+                placeholder={ui.search.keywordPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-xl border border-gray-200/80 bg-gray-50/50 py-2.5 pr-4 pl-9 text-xs text-gray-900 outline-none transition-all focus:border-rose-400 focus:bg-white focus:ring-2 focus:ring-rose-500/10 placeholder:text-gray-400"
@@ -125,7 +125,7 @@ export default function SearchView({
 
           {/* Genre selection */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ジャンル</label>
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ui.search.genreLabel}</label>
             <select
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
@@ -142,10 +142,10 @@ export default function SearchView({
 
           {/* Year filtering */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">放送年代（西暦）</label>
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ui.search.yearLabel}</label>
             <input
               type="number"
-              placeholder="例：2024"
+              placeholder={ui.search.yearPlaceholder}
               value={year}
               onChange={(e) => setYear(e.target.value)}
               className="w-full rounded-xl border border-gray-200/80 bg-gray-50/50 py-2.5 px-3 text-xs text-gray-900 outline-none transition-all focus:border-rose-400 focus:bg-white focus:ring-2 focus:ring-rose-500/10 placeholder:text-gray-400"
@@ -155,16 +155,16 @@ export default function SearchView({
 
           {/* Sorting */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">並び替え基準</label>
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ui.search.sortLabel}</label>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
               className="w-full rounded-xl border border-gray-200/80 bg-gray-50/50 py-2.5 px-3 text-xs text-gray-700 outline-none transition-all focus:border-rose-400 focus:bg-white focus:ring-2 focus:ring-rose-500/10"
               id="sort-select-field"
             >
-              <option value="popularity">人気順（定番）</option>
-              <option value="score">診断満足度順</option>
-              <option value="newest">新着・放送年順</option>
+              <option value="popularity">{ui.search.sortPopular}</option>
+              <option value="score">{ui.search.sortScore}</option>
+              <option value="newest">{ui.search.sortNewest}</option>
             </select>
           </div>
 
@@ -173,7 +173,7 @@ export default function SearchView({
         {/* Action Panel */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
           <span className="text-gray-400 font-medium">
-            該当件数: <span className="font-bold text-gray-700">{results.length}</span> 件
+            {lang === "ja" ? "該当件数: " : "Found: "}<span className="font-bold text-gray-700">{results.length}</span> {lang === "ja" ? "件" : "items"}
           </span>
           <button
             onClick={handleClearFilters}
@@ -181,7 +181,7 @@ export default function SearchView({
             id="clear-filters-btn"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            <span>フィルターをリセット</span>
+            <span>{ui.search.resetFilters}</span>
           </button>
         </div>
       </div>
@@ -201,22 +201,22 @@ export default function SearchView({
         <div className="rounded-3xl border border-dashed border-gray-200 p-16 text-center space-y-4 bg-gray-50/20">
           <Filter className="h-10 w-10 text-gray-300 mx-auto" />
           <div>
-            <h3 className="font-bold text-gray-700">条件に合致するアニメが見つかりません</h3>
+            <h3 className="font-bold text-gray-700">{lang === "ja" ? "条件に合致するアニメが見つかりません" : "No matching anime found"}</h3>
             <p className="text-xs text-gray-400 mt-1">
-              キーワードを短くしたり、ジャンル・放送年代を「すべて」に戻してお試しください。
+              {lang === "ja" ? "キーワードを短くしたり、ジャンル・放送年代を「すべて」に戻してお試しください。" : "Try adjusting keywords or resetting filters to 'All'."}
             </p>
           </div>
           <button
             onClick={handleClearFilters}
             className="px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-semibold hover:bg-rose-600 transition-colors"
           >
-            条件をリセットする
+            {ui.search.resetFilters}
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
           {(results || []).filter((anime) => anime && anime.id).map((anime) => {
-            const mainTitle = anime.title?.native || anime.title?.userPreferred || anime.title?.english || anime.title?.romaji || "作品名未設定";
+            const mainTitle = anime.title?.native || anime.title?.userPreferred || anime.title?.english || anime.title?.romaji || (lang === "ja" ? "作品名未設定" : "Untitled");
             const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : null;
             const isFav = favorites.includes(anime.id);
 
@@ -237,7 +237,7 @@ export default function SearchView({
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                     <span className="inline-flex items-center space-x-1 text-xs font-semibold text-white bg-rose-500 rounded-lg px-2 py-1">
                       <Play className="h-3 w-3 fill-current" />
-                      <span>詳細を見る</span>
+                      <span>{ui.result.viewDetailsBtn}</span>
                     </span>
                   </div>
 
@@ -255,9 +255,9 @@ export default function SearchView({
 
                   {/* Quality Score Badge */}
                   {score && (
-                    <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm" title="診断ユーザー満足度">
+                    <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span>満足度 {score}</span>
+                      <span>{score}</span>
                     </div>
                   )}
                 </div>
@@ -273,7 +273,7 @@ export default function SearchView({
                       {mainTitle}
                     </h3>
                     <p className="text-[10px] text-gray-400 line-clamp-1 mt-0.5">
-                      {anime.studios?.nodes?.[0]?.name || "情報未登録"} {anime.startDate?.year ? `・ ${anime.startDate.year}年` : ""}
+                      {anime.studios?.nodes?.[0]?.name || (lang === "ja" ? "情報未登録" : "Unknown Studio")} {anime.startDate?.year ? `・ ${anime.startDate.year}` : ""}
                     </p>
                   </div>
 
@@ -284,7 +284,7 @@ export default function SearchView({
                         key={idx}
                         className="inline-block rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-semibold text-rose-600"
                       >
-                        {translateGenreToJapanese(g)}
+                        {lang === "ja" ? translateGenreToJapanese(g) : g}
                       </span>
                     ))}
                   </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { User, Heart, History, Trash2, ArrowRight, Play, Star, Sparkles, Compass, ShieldCheck } from "lucide-react";
 import { AnimeMedia, DiagnosticHistory } from "../types";
 import { motion } from "motion/react";
+import { useLanguage } from "../context/LanguageContext";
 
 interface MyPageViewProps {
   favorites: number[];
@@ -22,6 +23,7 @@ export default function MyPageView({
   setSelectedAnimeId,
   setDiagnosisResult,
 }: MyPageViewProps) {
+  const { lang, ui } = useLanguage();
   const [favoriteMedia, setFavoriteMedia] = useState<AnimeMedia[]>([]);
   const [loadingFavs, setLoadingFavs] = useState(false);
   const [activeTab, setActiveTab] = useState<"favorites" | "history" | "stats">("favorites");
@@ -102,16 +104,16 @@ export default function MyPageView({
         </div>
 
         <div className="space-y-1 text-center sm:text-left flex-grow">
-          <h1 className="text-xl font-extrabold text-gray-950">マイ・ダッシュボード</h1>
-          <p className="text-xs text-gray-400">お気に入り作品のストック、これまでの精密診断の記録を一元管理しています。</p>
+          <h1 className="text-xl font-extrabold text-gray-950">{ui.mypage.title}</h1>
+          <p className="text-xs text-gray-400">{ui.mypage.subtitle}</p>
           
           <div className="flex items-center justify-center sm:justify-start space-x-6 pt-3 text-xs text-gray-500">
             <div>
-              お気に入り: <span className="font-bold text-rose-500">{favorites.length} 件</span>
+              {ui.mypage.tabFavorites}: <span className="font-bold text-rose-500">{favorites.length}</span>
             </div>
             <div className="h-3 w-px bg-gray-200"></div>
             <div>
-              診断履歴: <span className="font-bold text-violet-500">{historyList.length} 件</span>
+              {ui.mypage.tabHistory}: <span className="font-bold text-violet-500">{historyList.length}</span>
             </div>
           </div>
         </div>
@@ -127,7 +129,7 @@ export default function MyPageView({
           id="mytab-favs"
         >
           <Heart className="h-4 w-4" />
-          <span>お気に入り ({favorites.length})</span>
+          <span>{ui.mypage.tabFavorites} ({favorites.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("history")}
@@ -137,7 +139,7 @@ export default function MyPageView({
           id="mytab-history"
         >
           <History className="h-4 w-4" />
-          <span>診断履歴 ({historyList.length})</span>
+          <span>{ui.mypage.tabHistory} ({historyList.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("stats")}
@@ -147,7 +149,7 @@ export default function MyPageView({
           id="mytab-stats"
         >
           <Compass className="h-4 w-4" />
-          <span>お好み分析グラフ</span>
+          <span>{ui.mypage.tabStats}</span>
         </button>
       </div>
 
@@ -159,16 +161,16 @@ export default function MyPageView({
               <div className="rounded-2xl border border-dashed border-gray-200 p-16 text-center space-y-4">
                 <Heart className="h-10 w-10 text-gray-300 mx-auto" />
                 <div>
-                  <h3 className="font-bold text-gray-700">お気に入り作品はありません</h3>
+                  <h3 className="font-bold text-gray-700">{ui.mypage.noFavoritesTitle}</h3>
                   <p className="text-xs text-gray-400 mt-1">
-                    診断結果や作品検索から、気になる作品のハートをタップして登録してください。
+                    {ui.mypage.noFavoritesSub}
                   </p>
                 </div>
                 <button
                   onClick={() => setView("search")}
                   className="px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-semibold hover:bg-rose-600 transition-colors"
                 >
-                  作品を探す
+                  {ui.mypage.exploreBtn}
                 </button>
               </div>
             ) : loadingFavs ? (
@@ -183,7 +185,7 @@ export default function MyPageView({
             ) : (
               <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
                 {(favoriteMedia || []).filter((anime) => anime && anime.id).map((anime) => {
-                  const mainTitle = anime.title?.native || anime.title?.userPreferred || anime.title?.english || anime.title?.romaji || "作品名未設定";
+                  const mainTitle = anime.title?.native || anime.title?.userPreferred || anime.title?.english || anime.title?.romaji || (lang === "ja" ? "作品名未設定" : "Untitled");
                   const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : null;
 
                   return (
@@ -251,35 +253,35 @@ export default function MyPageView({
               <div className="rounded-2xl border border-dashed border-gray-200 p-16 text-center space-y-4">
                 <History className="h-10 w-10 text-gray-300 mx-auto" />
                 <div>
-                  <h3 className="font-bold text-gray-700">診断履歴はありません</h3>
+                  <h3 className="font-bold text-gray-700">{ui.mypage.noHistoryTitle}</h3>
                   <p className="text-xs text-gray-400 mt-1">
-                    精密診断を一度体験すると、その結果がこちらに記録され、いつでも再確認できます。
+                    {ui.mypage.noHistorySub}
                   </p>
                 </div>
                 <button
                   onClick={() => setView("diagnose")}
                   className="px-5 py-2.5 bg-rose-500 text-white rounded-xl text-xs font-semibold hover:bg-rose-600 transition-colors"
                 >
-                  診断を試す
+                  {ui.home.startDiagnosisBtn}
                 </button>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-400">履歴保存件数: {historyList.length} 件</span>
+                  <span className="text-gray-400">{lang === "ja" ? "履歴保存件数:" : "History count:"} {historyList.length}</span>
                   <button
                     onClick={clearHistory}
                     className="text-gray-400 hover:text-red-500 font-bold transition-colors flex items-center space-x-1"
                     id="clear-history-btn"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    <span>履歴をすべて消去</span>
+                    <span>{ui.mypage.clearHistoryBtn}</span>
                   </button>
                 </div>
 
                 <div className="grid gap-4">
                   {(historyList || []).filter((item) => item && item.result).map((item, idx) => {
-                    const formattedDate = item.result.createdAt ? new Date(item.result.createdAt).toLocaleString("ja-JP", {
+                    const formattedDate = item.result.createdAt ? new Date(item.result.createdAt).toLocaleString(lang === "ja" ? "ja-JP" : "en-US", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
@@ -294,12 +296,12 @@ export default function MyPageView({
                       >
                         <div className="space-y-1.5">
                           <span className="inline-flex items-center rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-600">
-                            診断結果
+                            {lang === "ja" ? "診断結果" : "Diagnosis Result"}
                           </span>
                           <h3 className="text-base font-bold text-gray-950">
                             『{item.result.typeName}』
                           </h3>
-                          <p className="text-[11px] text-gray-400">診断日時: {formattedDate}</p>
+                          <p className="text-[11px] text-gray-400">{lang === "ja" ? "診断日時:" : "Date:"} {formattedDate}</p>
                         </div>
 
                         <button
@@ -307,7 +309,7 @@ export default function MyPageView({
                           className="inline-flex items-center justify-center space-x-1 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-xs font-bold hover:bg-gray-50 hover:text-rose-500 transition-colors shrink-0"
                           id={`replay-history-btn-${item.id}`}
                         >
-                          <span>診断詳細を見る</span>
+                          <span>{ui.result.viewDetailsBtn}</span>
                           <ArrowRight className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -324,14 +326,14 @@ export default function MyPageView({
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
                 <Sparkles className="h-5 w-5 text-rose-500 animate-pulse" />
-                <span>お気に入りジャンルの自動可視化</span>
+                <span>{lang === "ja" ? "お気に入りジャンルの自動可視化" : "Favorite Genre Breakdown"}</span>
               </h3>
-              <p className="text-xs text-gray-400">お気に入りした作品のジャンル配分をリアルタイムに集計したグラフです。</p>
+              <p className="text-xs text-gray-400">{lang === "ja" ? "お気に入りした作品のジャンル配分をリアルタイムに集計したグラフです。" : "Real-time chart analyzing genre distribution from your favorited anime."}</p>
             </div>
 
             {favoriteMedia.length === 0 ? (
               <div className="rounded-xl bg-gray-50 p-8 text-center text-xs text-gray-400">
-                お気に入り作品を登録すると、あなたの好きなジャンルの配分が自動でグラフ化されます。
+                {lang === "ja" ? "お気に入り作品を登録すると、あなたの好きなジャンルの配分が自動でグラフ化されます。" : "Add anime to favorites to see your personal genre preference chart."}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
@@ -380,7 +382,7 @@ export default function MyPageView({
 
                 {/* Genre breakdown legend list */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Top 5 ジャンル配分</h4>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{lang === "ja" ? "Top 5 ジャンル配分" : "Top 5 Genres"}</h4>
                   <div className="space-y-2">
                     {sortedStats.slice(0, 5).map((stat, sIdx) => {
                       const colors = ["bg-rose-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500", "bg-cyan-500"];
@@ -391,7 +393,7 @@ export default function MyPageView({
                               <span className={`h-2.5 w-2.5 rounded-full ${colors[sIdx % colors.length]}`}></span>
                               <span className="text-gray-700">{stat.genre}</span>
                             </div>
-                            <span className="text-gray-500">{stat.count}件 ({stat.percent}%)</span>
+                            <span className="text-gray-500">{stat.count} {lang === "ja" ? "件" : "item(s)"} ({stat.percent}%)</span>
                           </div>
                           {/* Mini Progress Bar */}
                           <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -410,9 +412,9 @@ export default function MyPageView({
       </div>
 
       {/* Trust Compliance footer line */}
-      <div className="flex items-center justify-center space-x-1.5 text-xs text-gray-400">
+      <div className="flex items-center justify-center space-x-1.5 text-xs text-gray-400 text-center">
         <ShieldCheck className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
-        <span>お客様の診断履歴やお気に入りデータはブラウザのLocalStorageに保存されます。</span>
+        <span>{lang === "ja" ? "お客様の診断履歴やお気に入りデータはブラウザのLocalStorageに保存されます。" : "Your diagnosis history and favorites are stored safely in your browser's LocalStorage."}</span>
       </div>
     </div>
   );

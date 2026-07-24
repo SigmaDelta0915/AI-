@@ -1,5 +1,6 @@
 import React from "react";
-import { Sparkles, Search, Heart, User, Settings, HelpCircle, Sun, Moon } from "lucide-react";
+import { Sparkles, Search, Heart, User, Settings, HelpCircle, Sun, Moon, Globe } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 interface NavbarProps {
   currentView: string;
@@ -11,6 +12,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ currentView, setView, favoritesCount, isDarkMode, toggleDarkMode, isAdminAuthenticated }: NavbarProps) {
+  const { lang, toggleLang, ui } = useLanguage();
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-xl transition-all duration-300">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -25,16 +28,16 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
           </div>
           <div className="flex items-center space-x-1.5">
             <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-xl font-bold tracking-tight text-transparent font-sans">
-              アニメ診断 <span className="text-rose-500 text-sm font-medium tracking-normal ml-0.5">Diagnose</span>
+              {ui.appName} <span className="text-rose-500 text-sm font-medium tracking-normal ml-0.5">Diagnose</span>
             </span>
             <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              国内公式API連動
+              {lang === "ja" ? "国内公式API連動" : "AniList API Linked"}
             </span>
           </div>
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
           <button
             onClick={() => setView("home")}
             className={`text-sm font-medium transition-colors ${
@@ -42,7 +45,7 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
             }`}
             id="nav-btn-home"
           >
-            ホーム
+            {ui.nav.home}
           </button>
           <button
             onClick={() => setView("diagnose")}
@@ -52,7 +55,7 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
             id="nav-btn-diagnose"
           >
             <Sparkles className="h-4 w-4" />
-            <span>診断を始める</span>
+            <span>{ui.nav.diagnose}</span>
           </button>
           <button
             onClick={() => setView("search")}
@@ -62,7 +65,7 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
             id="nav-btn-search"
           >
             <Search className="h-4 w-4 mr-0.5" />
-            作品検索
+            {ui.nav.search}
           </button>
           <button
             onClick={() => setView("mypage")}
@@ -72,19 +75,31 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
             id="nav-btn-mypage"
           >
             <User className="h-4 w-4 mr-0.5" />
-            マイページ
+            {ui.nav.mypage}
             {favoritesCount > 0 && (
               <span className="absolute -top-2 -right-3.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white ring-2 ring-white animate-pulse">
                 {favoritesCount}
               </span>
             )}
           </button>
+
+          {/* Language Toggle Button */}
+          <button
+            onClick={toggleLang}
+            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-xs"
+            id="lang-toggle-btn"
+            title={lang === "ja" ? "Switch to English" : "日本語に切り替え"}
+          >
+            <Globe className="h-3.5 w-3.5 text-rose-500" />
+            <span>{lang === "ja" ? "EN" : "日本語"}</span>
+          </button>
+
           {toggleDarkMode && (
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-950 transition-colors flex items-center justify-center"
               id="theme-toggle-desktop"
-              title={isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"}
+              title={isDarkMode ? "Light Mode" : "Dark Mode"}
             >
               {isDarkMode ? <Sun className="h-4.5 w-4.5 text-amber-400" /> : <Moon className="h-4.5 w-4.5 text-slate-600" />}
             </button>
@@ -96,7 +111,7 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
                 currentView === "admin" ? "text-rose-600 font-semibold" : "text-gray-400 hover:text-gray-700"
               }`}
               id="nav-btn-admin"
-              title="管理画面（シミュレーター）"
+              title="Admin View"
             >
               <Settings className="h-4 w-4" />
             </button>
@@ -104,13 +119,23 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
         </div>
 
         {/* Mobile quick access */}
-        <div className="flex md:hidden items-center space-x-3">
+        <div className="flex md:hidden items-center space-x-2">
+          {/* Mobile Language Toggle Button */}
+          <button
+            onClick={toggleLang}
+            className="flex items-center px-2 py-1 rounded-md border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50"
+            id="mobile-lang-toggle"
+            title="Switch Language"
+          >
+            <Globe className="h-3.5 w-3.5 text-rose-500 mr-1" />
+            {lang === "ja" ? "EN" : "JP"}
+          </button>
           {toggleDarkMode && (
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-lg text-gray-500 transition-colors hover:bg-gray-100 flex items-center justify-center"
               id="theme-toggle-mobile"
-              title={isDarkMode ? "ライトモード" : "ダークモード"}
+              title={isDarkMode ? "Light Mode" : "Dark Mode"}
             >
               {isDarkMode ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5 text-slate-600" />}
             </button>
@@ -144,7 +169,7 @@ export default function Navbar({ currentView, setView, favoritesCount, isDarkMod
               onClick={() => setView("admin")}
               className={`p-2 rounded-lg transition-colors ${currentView === "admin" ? "text-rose-500 bg-rose-50" : "text-gray-500"}`}
               id="mobile-nav-admin"
-              title="管理画面"
+              title="Admin"
             >
               <Settings className="h-5 w-5" />
             </button>
