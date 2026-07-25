@@ -157,17 +157,19 @@ export default function ResultView({
                 <div className="space-y-1">
                   <h3 className="text-sm font-extrabold text-gray-900 flex items-center space-x-1.5">
                     <Sparkles className="h-4 w-4 text-rose-500" />
-                    <span>シェアモード：診断結果カードをカスタマイズ</span>
+                    <span>{lang === "en" ? "Share Mode: Customize Result Card" : "シェアモード：診断結果カードをカスタマイズ"}</span>
                   </h3>
                   <p className="text-xs text-gray-400">
-                    ニックネームを入力して、SNSへの投稿やスクショに最適なオリジナルカードを作成できます。
+                    {lang === "en"
+                      ? "Enter your nickname to generate a custom result card for social media and screenshots."
+                      : "ニックネームを入力して、SNSへの投稿やスクショに最適なオリジナルカードを作成できます。"}
                   </p>
                 </div>
 
                 {/* Nickname input */}
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1.5">
-                    あなたのニックネーム (最大12文字)
+                    {lang === "en" ? "Your Nickname (Max 12 chars)" : "あなたのニックネーム (最大12文字)"}
                   </label>
                   <input
                     type="text"
@@ -177,7 +179,7 @@ export default function ResultView({
                       setNickname(e.target.value);
                       setCopied(false);
                     }}
-                    placeholder="ニックネームを入力..."
+                    placeholder={lang === "en" ? "Enter nickname..." : "ニックネームを入力..."}
                     className="w-full text-xs px-3 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300 transition-all font-medium"
                   />
                 </div>
@@ -194,7 +196,9 @@ export default function ResultView({
                     {/* Result type and nickname */}
                     <div className="text-center space-y-3 py-3">
                       <p className="text-xs font-bold text-gray-400">
-                        {nickname ? `${nickname} さん` : "GUEST"} の性格タイプ
+                        {lang === "en"
+                          ? `${nickname || "GUEST"}'s Type`
+                          : `${nickname ? `${nickname} さん` : "GUEST"} の性格タイプ`}
                       </p>
                       <h4 className="text-2xl font-black tracking-tight text-transparent bg-gradient-to-r from-rose-500 to-violet-600 bg-clip-text">
                         『 {result.typeName} 』
@@ -232,7 +236,9 @@ export default function ResultView({
                 <div className="space-y-2">
                   <button
                     onClick={() => {
-                      const shareText = `【アニメ性格診断結果】\n✨ ${nickname ? `${nickname}さん` : "私"}の診断タイプは『${result.typeName}』でした！\n\n💎 性格の特徴：\n${result.keyTraits.map(t => `・#${t}`).join("\n")}\n\n🎬 おすすめアニメ第一候補：\n『${result.recommendations[0]?.media?.title?.native || result.recommendations[0]?.title || "作品"}』\nAI推奨理由: ${result.recommendations[0]?.reason.slice(0, 45)}...\n\n#アニメ診断 #AI性格診断 #おすすめアニメ\n${window.location.origin}`;
+                      const shareText = lang === "ja"
+                        ? `【アニメ性格診断結果】\n✨ ${nickname ? `${nickname}さん` : "私"}の診断タイプは『${result.typeName}』でした！\n\n💎 性格の特徴：\n${result.keyTraits.map(t => `・#${t}`).join("\n")}\n\n🎬 おすすめアニメ第一候補：\n『${result.recommendations[0]?.media?.title?.userPreferred || result.recommendations[0]?.title || "作品"}』\nAI推奨理由: ${result.recommendations[0]?.reason.slice(0, 45)}...\n\n#アニメ診断 #AI性格診断 #おすすめアニメ\n${window.location.origin}`
+                        : `[Anime Personality Diagnosis]\n✨ ${nickname ? nickname : "My"} result type: "${result.typeName}"!\n\n💎 Key Traits:\n${result.keyTraits.map(t => `・#${t}`).join("\n")}\n\n🎬 Top Anime Match:\n"${result.recommendations[0]?.media?.title?.userPreferred || result.recommendations[0]?.title || "Anime"}"\nAI Match Reason: ${result.recommendations[0]?.reason.slice(0, 45)}...\n\n#AnimeDiagnose #AIAnimeMatch\n${window.location.origin}`;
                       navigator.clipboard.writeText(shareText);
                       setCopied(true);
                       setTimeout(() => setCopied(false), 2000);
@@ -243,17 +249,19 @@ export default function ResultView({
                     {copied ? (
                       <>
                         <Check className="h-4 w-4 text-emerald-400" />
-                        <span className="text-emerald-400 font-extrabold">クリップボードにコピーしました！</span>
+                        <span className="text-emerald-400 font-extrabold">{lang === "en" ? "Copied to clipboard!" : "クリップボードにコピーしました！"}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="h-4 w-4" />
-                        <span>結果をクリップボードにコピー</span>
+                        <span>{lang === "en" ? "Copy Results to Clipboard" : "結果をクリップボードにコピー"}</span>
                       </>
                     )}
                   </button>
                   <p className="text-[10px] text-gray-400 text-center">
-                    コピーしたテキストはそのままSNS、ブログ、LINE等にペーストして共有できます。
+                    {lang === "en"
+                      ? "You can paste the copied text directly into social media, messaging apps, or blogs."
+                      : "コピーしたテキストはそのままSNS、ブログ、LINE等にペーストして共有できます。"}
                   </p>
                 </div>
               </motion.div>

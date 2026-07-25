@@ -233,22 +233,56 @@ const JAPANESE_GENRE_MAP: Record<string, string> = {
   Thriller: "サスペンス",
 };
 
-function formatMediaForJapaneseApi(item: any) {
+const ENGLISH_GENRE_MAP: Record<string, string> = {
+  "バトル・アクション": "Action",
+  "冒険・ファンタジー": "Adventure",
+  "コメディ・ギャグ": "Comedy",
+  "ドラマ・感動": "Drama",
+  "ファンタジー・異世界": "Fantasy",
+  "ホラー・怪異": "Horror",
+  "魔法少女": "Magical Girl",
+  "ロボット・メカ": "Mecha",
+  "音楽・ライブ": "Music",
+  "推理・ミステリー": "Mystery",
+  "心理・サスペンス": "Psychological",
+  "恋愛・ラブコメ": "Romance",
+  "SF・近未来": "Sci-Fi",
+  "日常・学園": "Slice of Life",
+  "スポーツ・熱血": "Sports",
+  "異能・オカルト": "Supernatural",
+  "サスペンス": "Thriller",
+};
+
+function formatMedia(item: any, lang: "ja" | "en" = "ja") {
   if (!item) return item;
   const copy = JSON.parse(JSON.stringify(item));
-  
-  const jpTitle = copy.title?.native || copy.title?.userPreferred || copy.title?.romaji || "";
-  if (copy.title) {
-    copy.title.native = jpTitle;
-    copy.title.userPreferred = jpTitle;
+
+  if (lang === "en") {
+    const enTitle = copy.title?.english || copy.title?.userPreferred || copy.title?.romaji || "Untitled Anime";
+    if (copy.title) {
+      copy.title.userPreferred = enTitle;
+    }
+    if (Array.isArray(copy.genres)) {
+      copy.genres = copy.genres.map((g: string) => ENGLISH_GENRE_MAP[g] || g);
+    }
+    copy.sourceApi = "AniList API (Official Global Dataset)";
+  } else {
+    const jpTitle = copy.title?.native || copy.title?.userPreferred || copy.title?.romaji || "";
+    if (copy.title) {
+      copy.title.native = jpTitle;
+      copy.title.userPreferred = jpTitle;
+    }
+    if (Array.isArray(copy.genres)) {
+      copy.genres = copy.genres.map((g: string) => JAPANESE_GENRE_MAP[g] || g);
+    }
+    copy.sourceApi = "Shangri-La Anime API / Annict (日本国内公式データ)";
   }
 
-  if (Array.isArray(copy.genres)) {
-    copy.genres = copy.genres.map((g: string) => JAPANESE_GENRE_MAP[g] || g);
-  }
-
-  copy.sourceApi = "Shangri-La Anime API / Annict (日本国内公式データ)";
   return copy;
+}
+
+function formatMediaForJapaneseApi(item: any) {
+  return formatMedia(item, "ja");
 }
 
 // Japanese Open API: Shangri-La Anime API proxy endpoint
@@ -289,6 +323,7 @@ app.get("/api/jp/annict", async (req, res) => {
 app.get("/api/anime/popular", async (req, res) => {
   const page = parseInt(req.query.page as string) || 1;
   const perPage = parseInt(req.query.perPage as string) || 12;
+  const lang = (req.query.lang as string) === "en" ? "en" : "ja";
 
   const query = `
     query ($page: Int, $perPage: Int) {
@@ -333,20 +368,21 @@ app.get("/api/anime/popular", async (req, res) => {
     const result = await fetchAniList(query, { page, perPage });
     const mediaList = result.data?.Page?.media;
     if (Array.isArray(mediaList) && mediaList.length > 0) {
-      const formatted = mediaList.map(formatMediaForJapaneseApi);
+      const formatted = mediaList.map((item) => formatMedia(item, lang));
       return res.json(formatted);
     }
   } catch (error: any) {
     console.error("AniList popular fetch error:", error);
   }
 
-  const fallbacks = SERVER_FALLBACK_ANIME.slice(0, perPage).map(formatMediaForJapaneseApi);
+  const fallbacks = SERVER_FALLBACK_ANIME.slice(0, perPage).map((item) => formatMedia(item, lang));
   res.json(fallbacks);
 });
 
 // Proxy route for searching anime
 app.post("/api/anime/search", async (req, res) => {
   const { search, genre, year, sort, page, perPage } = req.body;
+  const lang = req.body.lang === "en" ? "en" : "ja";
 
   let sortValue = "POPULARITY_DESC";
   if (sort === "score") sortValue = "SCORE_DESC";
@@ -420,7 +456,7 @@ app.post("/api/anime/search", async (req, res) => {
   try {
     const result = await fetchAniList(query, variables);
     const rawList = result.data?.Page?.media || [];
-    const formatted = Array.isArray(rawList) ? rawList.map(formatMediaForJapaneseApi) : [];
+    const formatted = Array.isArray(rawList) ? rawList.map((item) => formatMedia(item, lang)) : [];
     res.json(formatted);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -511,6 +547,7 @@ ${englishDescription}
 // Proxy route for fetching a single anime details by ID
 app.get("/api/anime/:id", async (req, res) => {
   const animeId = parseInt(req.params.id);
+  const lang = (req.query.lang as string) === "en" ? "en" : "ja";
   const query = `
     query ($id: Int) {
       Media (id: $id, type: ANIME) {
@@ -553,10 +590,13 @@ app.get("/api/anime/:id", async (req, res) => {
 
   try {
     const result = await fetchAniList(query, { id: animeId });
-    const media = result.data?.Media || null;
+    let media = result.data?.Media || null;
     if (media) {
-      const title = media.title?.native || media.title?.userPreferred || media.title?.english || "作品";
-      media.description = await getJapaneseDescription(animeId, title, media.description);
+      media = formatMedia(media, lang);
+      if (lang === "ja") {
+        const title = media.title?.native || media.title?.userPreferred || media.title?.english || "作品";
+        media.description = await getJapaneseDescription(animeId, title, media.description);
+      }
     }
     res.json(media);
   } catch (error: any) {

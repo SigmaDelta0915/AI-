@@ -27,7 +27,7 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
     async function loadAnimeDetails() {
       setLoading(true);
       try {
-        const data = await getAnimeDetail(animeId);
+        const data = await getAnimeDetail(animeId, lang);
         setAnime(data);
       } catch (error) {
         console.error("Failed to load anime details:", error);
@@ -37,7 +37,7 @@ export default function DetailView({ animeId, setView, favorites, toggleFavorite
     }
 
     loadAnimeDetails();
-  }, [animeId]);
+  }, [animeId, lang]);
 
   if (loading) {
     return (

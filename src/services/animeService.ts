@@ -1,5 +1,5 @@
 import { AnimeMedia, DiagnosisResult, RecommendedAnime } from "../types";
-import { FALLBACK_POPULAR_ANIME, translateGenreToJapanese } from "../data/fallbackAnime";
+import { FALLBACK_POPULAR_ANIME, translateGenreToJapanese, ENGLISH_DESCRIPTIONS, translateGenre } from "../data/fallbackAnime";
 
 // AniList GraphQL Direct Fetcher (Fallback for static hosting / Vercel without Express proxy)
 const ANILIST_GRAPHQL_URL = "https://graphql.anilist.co";
@@ -66,12 +66,61 @@ export async function safeJsonResponse<T = any>(res: Response): Promise<{ ok: bo
 // --------------------------------------------------------------------------
 // Popular Anime API (Proxy -> Direct Fallback -> Static Backup)
 // --------------------------------------------------------------------------
-export function ensureJapaneseAnimeData(anime: AnimeMedia): AnimeMedia {
+export function ensureAnimeData(anime: AnimeMedia, lang: "ja" | "en" = "ja"): AnimeMedia {
   if (!anime) return anime;
 
   const copy: AnimeMedia = JSON.parse(JSON.stringify(anime));
 
-  // Translate genres to Japanese
+  if (lang === "en") {
+    if (Array.isArray(copy.genres)) {
+      copy.genres = copy.genres.map(g => translateGenre(g, "en"));
+    }
+
+    const enTitle = copy.title?.english || copy.title?.userPreferred || copy.title?.romaji || "Untitled Anime";
+    if (copy.title) {
+      copy.title.userPreferred = enTitle;
+    }
+
+    const desc = copy.description || "";
+    const knownEn = ENGLISH_DESCRIPTIONS[copy.id];
+    if (knownEn) {
+      copy.description = knownEn;
+    } else {
+      let cleaned = desc.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]*>/g, "").trim();
+      const hasJapaneseChar = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(cleaned);
+      if (hasJapaneseChar || !cleaned) {
+        const genreText = copy.genres && copy.genres.length > 0 ? copy.genres.slice(0, 3).join(" • ") : "Action • Fantasy • Drama";
+        const studioText = copy.studios?.nodes?.[0]?.name ? `Studio: ${copy.studios.nodes[0].name}\n` : "";
+        const scoreText = copy.averageScore ? `Score: ${(copy.averageScore / 10).toFixed(1)}/10` : "Highly Rated";
+
+        copy.description = `[Synopsis]
+${enTitle} is a popular anime series set in a world of ${genreText}.
+
+Featuring compelling storytelling and memorable character arcs, this series delivers high-quality animation and emotional depth that resonates strongly with viewers.
+
+[Highlights]
+・High-quality animation and engaging narrative representative of the ${genreText} genres
+・Rich character development and emotional relationship dynamics
+・${studioText}Rated ${scoreText} by anime recommendation users`;
+      } else {
+        copy.description = cleaned;
+      }
+    }
+
+    if (copy.studios?.nodes) {
+      copy.studios.nodes = copy.studios.nodes.map(s => {
+        const name = s.name;
+        if (name === "マッドハウス") return { name: "Madhouse" };
+        if (name === "動画工房") return { name: "Doga Kobo" };
+        if (name === "トムス・エンタテインメント") return { name: "TMS Entertainment" };
+        return s;
+      });
+    }
+
+    return copy;
+  }
+
+  // Japanese formatting
   if (Array.isArray(copy.genres)) {
     copy.genres = copy.genres.map(g => translateGenreToJapanese(g));
   }
@@ -83,7 +132,6 @@ export function ensureJapaneseAnimeData(anime: AnimeMedia): AnimeMedia {
   const desc = copy.description || "";
   const hasJapaneseChar = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(desc);
 
-  // Normalize titles for robust matching
   const cleanJp = (jpTitle || "").replace(/[\s\t\n・！!★☆ー〜-]/g, "").toLowerCase();
   const cleanDisplay = (displayTitle || "").replace(/[\s\t\n・！!★☆ー〜-]/g, "").toLowerCase();
 
@@ -133,12 +181,16 @@ ${cleaned}
   return copy;
 }
 
-export async function getPopularAnime(perPage: number = 12): Promise<AnimeMedia[]> {
+export function ensureJapaneseAnimeData(anime: AnimeMedia): AnimeMedia {
+  return ensureAnimeData(anime, "ja");
+}
+
+export async function getPopularAnime(perPage: number = 12, lang: "ja" | "en" = "ja"): Promise<AnimeMedia[]> {
   try {
-    const res = await fetch(`/api/anime/popular?perPage=${perPage}`);
+    const res = await fetch(`/api/anime/popular?perPage=${perPage}&lang=${lang}`);
     const parsed = await safeJsonResponse<AnimeMedia[]>(res);
     if (parsed.ok && Array.isArray(parsed.data) && parsed.data.length > 0) {
-      return parsed.data.map(ensureJapaneseAnimeData);
+      return parsed.data.map(item => ensureAnimeData(item, lang));
     }
   } catch (err) {
     console.warn("API proxy failed, attempting direct AniList fetch...", err);
@@ -167,14 +219,14 @@ export async function getPopularAnime(perPage: number = 12): Promise<AnimeMedia[
     `;
     const data = await fetchAniListDirect(query, { perPage });
     if (data?.Page?.media && data.Page.media.length > 0) {
-      return data.Page.media.map(ensureJapaneseAnimeData);
+      return data.Page.media.map(item => ensureAnimeData(item, lang));
     }
   } catch (e) {
     console.warn("Direct AniList fetch error, utilizing fallback static dataset.", e);
   }
 
   // Guaranteed non-empty static dataset
-  return FALLBACK_POPULAR_ANIME.slice(0, perPage).map(ensureJapaneseAnimeData);
+  return FALLBACK_POPULAR_ANIME.slice(0, perPage).map(item => ensureAnimeData(item, lang));
 }
 
 // --------------------------------------------------------------------------
@@ -187,16 +239,18 @@ export async function searchAnime(params: {
   sort?: string;
   page?: number;
   perPage?: number;
+  lang?: "ja" | "en";
 }): Promise<AnimeMedia[]> {
+  const lang = params.lang || "ja";
   try {
     const res = await fetch("/api/anime/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
+      body: JSON.stringify({ ...params, lang }),
     });
     const parsed = await safeJsonResponse<AnimeMedia[]>(res);
     if (parsed.ok && Array.isArray(parsed.data) && parsed.data.length > 0) {
-      return parsed.data;
+      return parsed.data.map(item => ensureAnimeData(item, lang));
     }
   } catch (err) {
     console.warn("Search proxy failed, attempting direct AniList fetch...", err);
@@ -250,7 +304,7 @@ export async function searchAnime(params: {
     `;
     const data = await fetchAniListDirect(query, variables);
     if (data?.Page?.media && data.Page.media.length > 0) {
-      return data.Page.media.map(ensureJapaneseAnimeData);
+      return data.Page.media.map(item => ensureAnimeData(item, lang));
     }
   } catch (e) {
     console.warn("Direct search fetch failed, using client backup filtering", e);
@@ -270,18 +324,18 @@ export async function searchAnime(params: {
       a.description?.toLowerCase().includes(q)
     );
   }
-  return (filtered.length > 0 ? filtered : FALLBACK_POPULAR_ANIME).map(ensureJapaneseAnimeData);
+  return (filtered.length > 0 ? filtered : FALLBACK_POPULAR_ANIME).map(item => ensureAnimeData(item, lang));
 }
 
 // --------------------------------------------------------------------------
 // Anime Detail API (Proxy -> Direct Fallback -> Static Backup)
 // --------------------------------------------------------------------------
-export async function getAnimeDetail(id: number): Promise<AnimeMedia | null> {
+export async function getAnimeDetail(id: number, lang: "ja" | "en" = "ja"): Promise<AnimeMedia | null> {
   try {
-    const res = await fetch(`/api/anime/${id}`);
+    const res = await fetch(`/api/anime/${id}?lang=${lang}`);
     const parsed = await safeJsonResponse<AnimeMedia>(res);
     if (parsed.ok && parsed.data && parsed.data.id) {
-      return ensureJapaneseAnimeData(parsed.data);
+      return ensureAnimeData(parsed.data, lang);
     }
   } catch (err) {
     console.warn("Detail proxy failed, attempting direct AniList fetch...", err);
@@ -309,7 +363,7 @@ export async function getAnimeDetail(id: number): Promise<AnimeMedia | null> {
     `;
     const data = await fetchAniListDirect(query, { id });
     if (data?.Media) {
-      return ensureJapaneseAnimeData(data.Media);
+      return ensureAnimeData(data.Media, lang);
     }
   } catch (e) {
     console.warn("Direct detail fetch failed", e);
@@ -317,7 +371,7 @@ export async function getAnimeDetail(id: number): Promise<AnimeMedia | null> {
 
   // Backup lookup from static list
   const fallback = FALLBACK_POPULAR_ANIME.find(a => a.id === id) || FALLBACK_POPULAR_ANIME[0];
-  return ensureJapaneseAnimeData(fallback);
+  return ensureAnimeData(fallback, lang);
 }
 
 // --------------------------------------------------------------------------

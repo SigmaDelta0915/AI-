@@ -39,7 +39,7 @@ export default function MyPageView({
       setLoadingFavs(true);
       try {
         const promises = favorites.map(async (id) => {
-          const res = await fetch(`/api/anime/${id}`);
+          const res = await fetch(`/api/anime/${id}?lang=${lang}`);
           if (res.ok) {
             return await res.json();
           }
@@ -55,7 +55,7 @@ export default function MyPageView({
     }
 
     loadFavoriteDetails();
-  }, [favorites]);
+  }, [favorites, lang]);
 
   const selectAnime = (id: number) => {
     setSelectedAnimeId(id);

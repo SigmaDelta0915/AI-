@@ -60,7 +60,7 @@ export default function SearchView({
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [search, genre, year, sort]);
+  }, [search, genre, year, sort, lang]);
 
   const fetchResults = async () => {
     setLoading(true);
@@ -70,6 +70,7 @@ export default function SearchView({
         genre: genre || undefined,
         year: year || undefined,
         sort,
+        lang,
       });
       setResults(data);
     } catch (error) {

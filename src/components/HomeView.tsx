@@ -31,7 +31,7 @@ export default function HomeView({
     let isMounted = true;
     async function loadPopular() {
       try {
-        const data = await getPopularAnime(12);
+        const data = await getPopularAnime(12, lang);
         if (isMounted && data && data.length > 0) {
           setPopularAnime(data);
         }
@@ -43,7 +43,7 @@ export default function HomeView({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [lang]);
 
   const genres = [
     { name: lang === "ja" ? "バトル・アクション" : "Action & Battle", queryName: "Action", icon: "⚔️" },

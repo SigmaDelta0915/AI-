@@ -411,6 +411,120 @@ export const FALLBACK_POPULAR_ANIME: AnimeMedia[] = [
   },
 ];
 
+export const ENGLISH_DESCRIPTIONS: Record<number, string> = {
+  154587: `[Synopsis]
+The adventure is over, but life goes on for an elf mage just beginning to learn what time means to humanity. Following the defeat of the Demon King, elf mage Frieren and her courageous fellow adventurers part ways. Decades later, she attends her friend's funeral, realizing she knew so little about human life. Frieren embarks on a new journey to understand humanity and cherish precious memories.
+
+[Highlights]
+・A heartwarming fantasy journey exploring the beauty of human connections after the adventure ends
+・Breathtaking animation and delicate storytelling produced by Madhouse
+・Seamless blending of epic magical combat and peaceful everyday moments`,
+
+  150672: `[Synopsis]
+A doctor and his recently deceased patient are reborn as twin children to a famous Japanese pop idol, Ai Hoshino. As they grow up navigating the shining lights and dark secrets of the entertainment industry, they discover shocking truths that propel them into a thrilling world of ambition, revenge, and mystery.
+
+[Highlights]
+・A gripping psychological suspense examining both the glamor and dark side of show business
+・Masterful plot twists and brilliant character writing by Aka Akasaka and Mengo Yokoyari
+・Stunning idol concert choreography and iconic soundtrack`,
+
+  161645: `[Synopsis]
+Maomao, a young woman trained in herbal medicine, is kidnapped and forced into servant work at the emperor's inner palace. With her sharp mind, cool rationality, and extensive knowledge of poisons, she secretly solves a series of mysterious illnesses and imperial palace conspiracies, catching the eye of a handsome court eunuch.
+
+[Highlights]
+・A refreshing historical court mystery solved with pharmacology expertise and keen logic
+・Charming chemistry and witty banter between Maomao and imperial official Jinshi
+・Vibrant, colorful court aesthetics and rich character drama`,
+
+  101922: `[Synopsis]
+In Taisho-era Japan, kindhearted Tanjiro sells charcoal to support his family until a demon slaughters them. His younger sister Nezuko survives but is turned into a demon. Tanjiro joins the Demon Slayer Corps to find a cure for Nezuko and defeat the demon progenitor, Muzan Kibutsuji.
+
+[Highlights]
+・World-class swordplay animation and elemental effects by ufotable
+・Heartfelt family devotion and emotional empathy towards allies and foes alike
+・Unforgettable Hashira warriors and thrilling combat sequences`,
+
+  113415: `[Synopsis]
+Yuuji Itadori is a high school student with extraordinary physical strength. When his friends break the seal on a dangerous cursed object, Yuuji swallows the finger of Sukuna, the King of Curses, to save them. Enrolling in Tokyo Jujutsu High, he embarks on a dangerous quest to collect Sukuna's fingers.
+
+[Highlights]
+・Fast-paced, stylish combat choreography animated by MAPPA
+・Sophisticated curse power system including Domain Expansions
+・Iconic charismatic characters like Satoru Gojo`,
+
+  130003: `[Synopsis]
+Hitori Gotou, "Bocchi-chan," is an introverted girl who picked up guitar hoping to make friends. Despite becoming a skilled online musician, she remains socially anxious—until drum player Nijika invites her to join Kessoku Band. Together, they take their first courageous steps onto the live music stage.
+
+[Highlights]
+・Relatable humor and creative comedic animation styles
+・Authentic rock music and indie live house culture
+・Inspirational youth story of overcoming social anxiety through passion and music`,
+
+  140960: `[Synopsis]
+World peace is at stake! Master spy "Twilight" must disguise himself as psychiatrist Loid Forger and build a fake family. He adopts Anya, a telepathic girl, and marries Yor, an assassin. All three hide their secrets while navigating hilarious family life and world-saving missions.
+
+[Highlights]
+・Delightful blend of cute telepathic comedy and thrilling spy action
+・Heartwarming story of a fake family forming real emotional bonds
+・High-quality production jointly crafted by WIT STUDIO and CloverWorks`,
+
+  16498: `[Synopsis]
+Humanity was driven to the brink of extinction by monstrous Titans and survived behind three giant walls. When a Colossal Titan breaches the outer wall, young Eren Yeager vows to eradicate every Titan and join the Scout Regiment in a desperate fight for survival.
+
+[Highlights]
+・Epic scale and non-stop tension with breathtaking ODM gear action
+・Mind-blowing plot twists and deep geopolitical lore
+・Iconic soundtrack and unforgettable emotional drama`,
+
+  127230: `[Synopsis]
+Denji is a young man living as a Devil Hunter with Pochita, the Chainsaw Devil. Betrayed and killed, Denji is revived when Pochita becomes his heart, granting him chainsaw superpowers. Recruited by Public Safety, he fights ferocious devils in pursuit of simple dreams.
+
+[Highlights]
+・Raw, energetic dark fantasy action with cinematic direction
+・Unconventional hero with hilarious, relatable human desires
+・Gripping suspense and unpredictable plot twists`,
+
+  20464: `[Synopsis]
+Inspired by a small-statured volleyball ace, Shouyou Hinata joins Karasuno High School's volleyball team. Teaming up with his former rival, genius setter Tobio Kageyama, they combine speed and precision to challenge top tournament teams.
+
+[Highlights]
+・Electrifying volleyball matches where every point resonates emotionally
+・Exceptional character development across both Karasuno and rival teams
+・Inspiring themes of teamwork, persistence, and passion`,
+
+  21459: `[Synopsis]
+In a world where 80% of people have powers called "Quirks," Izuku Midoriya is born quirkless yet dreams of becoming a hero. After inheriting the power of All Might, the greatest hero, Midoriya enrolls in UA High School to become a true superhero.
+
+[Highlights]
+・Inspiring story of perseverance, heroism, and friendship
+・Thrilling hero vs. villain battles with incredible stakes
+・Diverse cast of heroic classmates with unique abilities`,
+
+  132405: `[Synopsis]
+Wakana Gojo, a high school boy passionate about making traditional Hina dolls, keeps his hobby secret. Everything changes when popular classmate Marin Kitagawa discovers his talent and asks him to sew cosplay outfits for her.
+
+[Highlights]
+・Sweet, wholesome romance celebrating passion and craftsmanship
+・Detailed look into cosplay creation and artistic dedication
+・Charming chemistry between two supportive main characters`,
+
+  153288: `[Synopsis]
+In a world threatened by monstrous Kaiju, Kafka Hibino works in Kaiju cleanup after failing the Defense Force exam. When a mysterious parasite transforms him into "Kaiju No. 8," Kafka gets a second chance to fight alongside humanity.
+
+[Highlights]
+・Thrilling adult protagonist pursuing his dream against impossible odds
+・High-octane defense battles against giant Kaiju
+・Great balance of intense action, humor, and military teamwork`,
+
+  235: `[Synopsis]
+High school detective Shinichi Kudo is forced to swallow an experimental poison that shrinks his body into a child. Adopting the alias Conan Edogawa, he solves complex murder cases while secretly pursuing the syndicate responsible.
+
+[Highlights]
+・Classic mystery reasoning with clever murder case deductions
+・Iconic detective tropes and long-running suspense
+・Charming cast of detectives, allies, and rivals`,
+};
+
 export const GENRE_JAPANESE_MAP: { [key: string]: string } = {
   Action: "バトル・アクション",
   Adventure: "冒険・アドベンチャー",
@@ -431,6 +545,33 @@ export const GENRE_JAPANESE_MAP: { [key: string]: string } = {
   Thriller: "サスペンス・スリラー",
 };
 
+export const GENRE_ENGLISH_MAP: Record<string, string> = {
+  "バトル・アクション": "Action",
+  "冒険・アドベンチャー": "Adventure",
+  "コメディ・ギャグ": "Comedy",
+  "感動・ドラマ": "Drama",
+  "ファンタジー・異世界": "Fantasy",
+  "ホラー・怪異": "Horror",
+  "魔法少女": "Magical Girl",
+  "ロボット・メカ": "Mecha",
+  "音楽・バンド": "Music",
+  "推理・ミステリー": "Mystery",
+  "心理・サイコ": "Psychological",
+  "恋愛・ラブコメ": "Romance",
+  "SF・サイバーパンク": "Sci-Fi",
+  "日常・ほのぼの": "Slice of Life",
+  "スポーツ・熱血": "Sports",
+  "オカルト・能力": "Supernatural",
+  "サスペンス・スリラー": "Thriller",
+};
+
 export function translateGenreToJapanese(genre: string): string {
+  return GENRE_JAPANESE_MAP[genre] || genre;
+}
+
+export function translateGenre(genre: string, lang: "ja" | "en" = "ja"): string {
+  if (lang === "en") {
+    return GENRE_ENGLISH_MAP[genre] || genre;
+  }
   return GENRE_JAPANESE_MAP[genre] || genre;
 }
