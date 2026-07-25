@@ -10,6 +10,7 @@ import MyPageView from "./components/MyPageView";
 import AdminView from "./components/AdminView";
 import { DiagnosisResult, DiagnosticHistory, AdConfiguration, Notice } from "./types";
 import { motion, AnimatePresence } from "motion/react";
+import { useLanguage } from "./context/LanguageContext";
 
 // Mock Initial Data for notices and ads
 const INITIAL_NOTICES: Notice[] = [
@@ -49,6 +50,8 @@ const INITIAL_ADS: AdConfiguration[] = [
 ];
 
 export default function App() {
+  const { lang } = useLanguage();
+
   // Current View Router (initial state resolved from URL path or hash)
   const [currentView, setView] = useState<string>(() => {
     try {
@@ -294,14 +297,32 @@ export default function App() {
       />
 
       {/* Announcements ticker at top if home view */}
-      {currentView === "home" && notices.length > 0 && (
-        <div className="bg-gradient-to-r from-rose-50 to-violet-50 border-b border-rose-100/40 py-2.5 px-4 text-center text-xs text-rose-600 font-semibold backdrop-blur-sm">
-          <div className="mx-auto max-w-7xl flex items-center justify-center space-x-2">
-            <span className="inline-block bg-rose-500 text-white font-black px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider scale-90">Notice</span>
-            <span className="truncate">{notices[0].title} — {notices[0].content}</span>
+      {currentView === "home" && notices.length > 0 && (() => {
+        const firstNotice = notices[0];
+        let displayTitle = firstNotice.title;
+        let displayContent = firstNotice.content;
+
+        if (lang === "en") {
+          if (firstNotice.id === "1" || firstNotice.title.includes("AIアニメ精密診断システム") || firstNotice.title.includes("一般公開")) {
+            displayTitle = "AI Anime Precision Diagnosis System v2.5 Public Release";
+            displayContent = "Gemini AI's advanced personality analysis is synchronized with real-time AniList database. 15 questions to find your ultimate anime match.";
+          } else if (firstNotice.id === "2" || firstNotice.title.includes("動画配信サービス") || firstNotice.title.includes("アフィリエイト")) {
+            displayTitle = "Streaming Service Partnership Started (DMM TV, U-NEXT, etc.)";
+            displayContent = "One-click safe redirection and free trial registration now open on anime detail pages.";
+          }
+        }
+
+        return (
+          <div className="bg-gradient-to-r from-rose-50 to-violet-50 border-b border-rose-100/40 py-2.5 px-4 text-center text-xs text-rose-600 font-semibold backdrop-blur-sm">
+            <div className="mx-auto max-w-7xl flex items-center justify-center space-x-2">
+              <span className="inline-block bg-rose-500 text-white font-black px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider scale-90">
+                {lang === "en" ? "Notice" : "お知らせ"}
+              </span>
+              <span className="truncate">{displayTitle} — {displayContent}</span>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Main Container with smooth page-level transitions */}
       <main className="flex-grow">

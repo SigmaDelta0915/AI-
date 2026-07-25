@@ -277,7 +277,7 @@ export default function HomeView({
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                       <span className="inline-flex items-center space-x-1 text-xs font-semibold text-white bg-rose-500 rounded-lg px-2 py-1">
                         <Play className="h-3 w-3 fill-current" />
-                        <span>詳細を見る</span>
+                        <span>{lang === "en" ? "View Details" : "詳細を見る"}</span>
                       </span>
                     </div>
 
@@ -295,9 +295,9 @@ export default function HomeView({
 
                     {/* Quality Badge */}
                     {score && (
-                      <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm" title="診断ユーザー満足度">
+                      <div className="absolute bottom-2 left-2 flex items-center space-x-1 rounded-lg bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm" title={lang === "en" ? "User Rating" : "診断ユーザー満足度"}>
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>満足度 {score}</span>
+                        <span>{lang === "en" ? `Rating ${score}` : `満足度 ${score}`}</span>
                       </div>
                     )}
                   </div>
@@ -313,7 +313,7 @@ export default function HomeView({
                         {mainTitle}
                       </h3>
                       <p className="text-[10px] text-gray-400 line-clamp-1 mt-0.5">
-                        {anime.studios?.nodes?.[0]?.name || "情報未登録"} {anime.startDate?.year ? `・ ${anime.startDate.year}年` : ""}
+                        {anime.studios?.nodes?.[0]?.name || (lang === "en" ? "Unknown Studio" : "情報未登録")} {anime.startDate?.year ? (lang === "en" ? `・ ${anime.startDate.year}` : `・ ${anime.startDate.year}年`) : ""}
                       </p>
                     </div>
 
@@ -348,10 +348,14 @@ export default function HomeView({
                 <span>AI Personality Assessment</span>
               </span>
               <h2 className="text-2xl font-bold tracking-tight sm:text-4xl">
-                15問、約2分であなたの「隠れたアニメ嗜好」を可視化。
+                {lang === "en"
+                  ? "Visualize your hidden anime preferences in 15 questions & 2 mins."
+                  : "15問、約2分であなたの「隠れたアニメ嗜好」を可視化。"}
               </h2>
               <p className="text-sm text-gray-300 leading-relaxed">
-                休日の過ごし方、もしもの選択、好きな結末の傾向を分析し、Geminiがあなたを深く理解。ネットのクチコミだけでは出会えなかった、あなたのための生涯の名作をマッチングします。
+                {lang === "en"
+                  ? "Analyzing your weekend habits, decision choices, and narrative taste — Gemini understands you deeply to find hidden masterpieces you'll love."
+                  : "休日の過ごし方、もしもの選択、好きな結末の傾向を分析し、Geminiがあなたを深く理解。ネットのクチコミだけでは出会えなかった、あなたのための生涯の名作をマッチングします。"}
               </p>
             </div>
             
@@ -360,7 +364,7 @@ export default function HomeView({
               className="flex items-center space-x-2 rounded-2xl bg-white px-6 py-4 text-sm font-bold text-gray-950 shadow-md hover:bg-gray-50 transition-transform hover:scale-[1.03] shrink-0"
               id="cta-bottom-start"
             >
-              <span>診断をスタートする</span>
+              <span>{lang === "en" ? "Start Diagnosis Now" : "診断をスタートする"}</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>

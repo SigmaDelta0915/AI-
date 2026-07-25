@@ -3,6 +3,7 @@ import { Settings, RefreshCw, Plus, Trash2, ShieldAlert, Check, Newspaper, Award
 import { AdConfiguration, Notice } from "../types";
 import { motion } from "motion/react";
 import { safeJsonResponse } from "../services/animeService";
+import { useLanguage } from "../context/LanguageContext";
 
 interface AdminViewProps {
   notices: Notice[];
@@ -14,6 +15,7 @@ interface AdminViewProps {
 }
 
 export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminAuthenticated, setIsAdminAuthenticated }: AdminViewProps) {
+  const { lang } = useLanguage();
   const [successMsg, setSuccessMsg] = useState("");
   const [clearingCache, setClearingCache] = useState(false);
   const [activeTab, setActiveTab] = useState<"ai-studio" | "notices" | "ads" | "seo" | "system">("ai-studio");
@@ -760,15 +762,17 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
             <div className="bg-white dark:bg-slate-950 border border-gray-100 dark:border-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 flex items-center space-x-2 pb-3 border-b border-gray-100 dark:border-slate-900">
                 <Newspaper className="h-5 w-5 text-rose-500" />
-                <span>お知らせ・アップデート配信</span>
+                <span>{lang === "en" ? "Announcements & Updates Publisher" : "お知らせ・アップデート配信"}</span>
               </h2>
 
               <form onSubmit={handleAddNotice} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">お知らせタイトル</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    {lang === "en" ? "Notice Title" : "お知らせタイトル"}
+                  </label>
                   <input
                     type="text"
-                    placeholder="例：夏のアニメ診断シーズンが到来！"
+                    placeholder={lang === "en" ? "e.g., Summer Anime Diagnosis Season has arrived!" : "例：夏のアニメ診断シーズンが到来！"}
                     value={newNoticeTitle}
                     onChange={(e) => setNewNoticeTitle(e.target.value)}
                     className="w-full rounded-xl border border-gray-200/80 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/30 py-2.5 px-3 text-xs outline-none focus:border-rose-400 focus:bg-white dark:focus:bg-slate-950 focus:ring-2 focus:ring-rose-500/10 text-gray-800 dark:text-slate-200"
@@ -776,10 +780,12 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">本文内容</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    {lang === "en" ? "Content Body" : "本文内容"}
+                  </label>
                   <textarea
                     rows={4}
-                    placeholder="ユーザーへ通知するお知らせの詳細を入力..."
+                    placeholder={lang === "en" ? "Enter notice details to publish..." : "ユーザーへ通知するお知らせの詳細を入力..."}
                     value={newNoticeContent}
                     onChange={(e) => setNewNoticeContent(e.target.value)}
                     className="w-full rounded-xl border border-gray-200/80 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/30 py-2.5 px-3 text-xs outline-none focus:border-rose-400 focus:bg-white dark:focus:bg-slate-950 focus:ring-2 focus:ring-rose-500/10 text-gray-800 dark:text-slate-200"
@@ -792,7 +798,7 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
                   id="admin-publish-notice-btn"
                 >
                   <Plus className="h-4 w-4" />
-                  <span>お知らせを一般公開する</span>
+                  <span>{lang === "en" ? "Publish Notice to Public" : "お知らせを一般公開する"}</span>
                 </button>
               </form>
             </div>
@@ -801,11 +807,13 @@ export default function AdminView({ notices, saveNotices, ads, saveAds, isAdminA
             <div className="bg-white dark:bg-slate-950 border border-gray-100 dark:border-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-gray-900 dark:text-slate-100 uppercase tracking-wider pb-3 border-b border-gray-100 dark:border-slate-900">
-                  配信中のニュース ＆ アナウンス ({(notices || []).length})
+                  {lang === "en" ? `Active News & Announcements (${(notices || []).length})` : `配信中のニュース ＆ アナウンス (${(notices || []).length})`}
                 </h3>
                 
                 {(!notices || notices.length === 0) ? (
-                  <p className="text-xs text-gray-400 py-12 text-center">現在、アクティブなお知らせはありません。</p>
+                  <p className="text-xs text-gray-400 py-12 text-center">
+                    {lang === "en" ? "There are currently no active notices." : "現在、アクティブなお知らせはありません。"}
+                  </p>
                 ) : (
                   <div className="divide-y divide-gray-100 dark:divide-slate-900 max-h-[250px] overflow-y-auto pr-1">
                     {(notices || []).filter(Boolean).map((notice) => (
