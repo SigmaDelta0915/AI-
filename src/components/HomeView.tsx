@@ -193,33 +193,6 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* Google AdSense Mock Frame */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50 p-4 text-center">
-          <div className="absolute top-2 right-2 text-[10px] text-gray-400 font-mono tracking-wider uppercase">ADVERTISEMENT</div>
-          <p className="text-xs text-gray-400 font-medium">{lang === "ja" ? "スポンサー広告" : "Sponsor Ad"}</p>
-          <div className="mt-2 flex flex-col md:flex-row items-center justify-between gap-4 py-2 px-4 bg-white/70 rounded-xl border border-gray-100 backdrop-blur-sm">
-            <div className="flex items-center space-x-3 text-left">
-              <div className="h-10 w-10 shrink-0 bg-rose-100 rounded-lg flex items-center justify-center">
-                <Flame className="h-5 w-5 text-rose-500" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-800">{lang === "ja" ? "最新のアニメが月額550円で見放題！【DMM TV】" : "Unlimited Anime Streaming at $5.50/mo! [DMM TV]"}</p>
-                <p className="text-[11px] text-gray-400">{lang === "ja" ? "新規登録なら30日間無料体験実施中。新作アニメも最速配信！" : "30-day free trial for new members. Fast releases for new titles!"}</p>
-              </div>
-            </div>
-            <a
-              href="https://tv.dmm.com/vod/"
-              target="_blank"
-              referrerPolicy="no-referrer"
-              className="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold hover:bg-gray-800 transition-colors shrink-0"
-            >
-              {lang === "ja" ? "無料体験を試す" : "Try Free Trial"}
-            </a>
-          </div>
-        </div>
-      </section>
-
       {/* Trending Anime section */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
